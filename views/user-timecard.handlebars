@@ -1,0 +1,397 @@
+<link rel="stylesheet" href="../css/user-timecard.css">
+<div id="background">
+    {{> navbar}}
+    <button id="save-btn">Save</button>
+    <div id="timecard">
+        <table>
+            <tr>
+                <th>Week 1</th>
+                <th>Notes</th>
+                <th>Sunday</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                <th>Weekly Total</th>
+            </tr>
+            <tr>
+                <td>Time In</td>
+                <td>
+                    <div class="edit-text-1" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td id="weekly-total"></td>
+            </tr>
+            <tr>
+                <td>Time Out</td>
+                <td>
+                    <div class="edit-text-1" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Time In</td>
+                <td>
+                    <div class="edit-text-1" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Time Out</td>
+                <td>
+                    <div class="edit-text-1" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Time In</td>
+                <td>
+                    <div class="edit-text-1" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Time Out</td>
+                <td>
+                    <div class="edit-text-1" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-1" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Daily Total</td>
+                <td></td>
+                <td id="0-total"></td>
+                <td id="1-total"></td>
+                <td id="2-total"></td>
+                <td id="3-total"></td>
+                <td id="4-total"></td>
+                <td id="5-total"></td>
+                <td id="6-total"></td>
+                <td></td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <th>Week 2</th>
+                <th>Notes</th>
+                <th>Sunday</th>
+                <th>Monday</th>
+                <th>Tuesday</th>
+                <th>Wednesday</th>
+                <th>Thursday</th>
+                <th>Friday</th>
+                <th>Saturday</th>
+                <th>Weekly Total</th>
+            </tr>
+            <tr>
+                <td>Time In</td>
+                <td>
+                    <div class="edit-text-2" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td id="weekly-total-2"></td>
+            </tr>
+            <tr>
+                <td>Time Out</td>
+                <td>
+                    <div class="edit-text-2" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Time In</td>
+                <td>
+                    <div class="edit-text-2" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Time Out</td>
+                <td>
+                    <div class="edit-text-2" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Time In</td>
+                <td>
+                    <div class="edit-text-2" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Time Out</td>
+                <td>
+                    <div class="edit-text-2" contenteditable="true"></div>
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td>
+                    <input class="edit-time-2" type="time">
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Daily Total</td>
+                <td></td>
+                <td id="0-total-2"></td>
+                <td id="1-total-2"></td>
+                <td id="2-total-2"></td>
+                <td id="3-total-2"></td>
+                <td id="4-total-2"></td>
+                <td id="5-total-2"></td>
+                <td id="6-total-2"></td>
+                <td id="7-total-2"></td>
+            </tr>
+        </table>
+    </div>
+</div>
+<script src="../js/process-timecard.js"></script>
+<script src="../js/user-timecard.js"></script>

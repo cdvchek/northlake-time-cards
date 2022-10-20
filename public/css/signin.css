@@ -1,0 +1,75 @@
+#background {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background-color: gainsboro;
+    align-items: center;
+}
+
+#div-login-box {
+    width: 470px;
+    height: 520px;
+    margin: auto;
+    background: white;
+    box-shadow: 0 0 15px grey;
+}
+
+#form-sign-in {
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+}
+
+#div-hdr-logo {
+    display: flex;
+    font-size: 150%;
+    color: grey;
+    align-items: center;
+}
+
+#div-hdr-sign-in {
+    font-size: 150%;
+    font-weight: bold;
+    color: rgb(65, 65, 65);
+}
+
+.p-sign-in-cred {
+    font-size: 110%;
+    margin: 5px 0;
+}
+
+.inpt-sign-in {
+    width: calc(100% - 80px);
+    height: 20px;
+    border: none;
+    border-bottom: solid rgb(9, 139, 175);
+    margin-bottom: 10px;
+}
+
+#a-need-help {
+    float: right;
+    position: relative;
+    right: 80px;
+}
+
+#div-btn-sign-in {
+    display: flex;
+    height: 60px;
+    width: calc(100% - 80px);
+    align-items: center;
+}
+
+#btn-sign-in {
+    color: white;
+    font-size: 100%;
+    margin: auto;
+    background-color: rgb(9, 139, 175);
+    border: none;
+    padding: 8px 35px;
+}
+
+#div-sign-up {
+    margin-top: 15px;
+    width: calc(100% - 80px);
+    text-align: center;
+}
