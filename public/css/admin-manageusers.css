@@ -1,0 +1,66 @@
+#background {
+    width: 100vw;
+    height: 100vh;
+    background-color: gainsboro;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: left;
+}
+
+#users-list {
+    border: 1px solid;
+    height: calc(100% - 120px);
+    background-color: white;
+    width: 20%;
+    box-shadow: 0 0 15px grey;
+    margin: 20px;
+}
+
+#users-list>ul>li {
+    list-style: none;
+    position: relative;
+    right: 6%;
+    padding: 5px 10px;
+    border: 1px solid;
+    margin-bottom: 10px;
+}
+
+#user-profile {
+    height: calc(100% - 120px);
+    width: 65%;
+    text-align: left;
+    padding: 10px 5px;
+}
+
+#user-flex {
+    display: flex;
+}
+
+#user-flex>div {
+    margin-right: 10px;
+}
+
+.change {
+    margin: 3px;
+}
+
+#email-span {
+    font-weight: 100;
+    font-size: 120%;
+    margin-bottom: 20px;
+}
+
+#register-user {
+    margin: 25px 0 10px 0;
+}
+
+#btn-delete-user {
+    position: absolute;
+    right: 40px;
+    bottom: 40px;
+    background-color: rgb(255, 72, 72);
+    color: white;
+    border: none;
+    padding: 10px;
+}

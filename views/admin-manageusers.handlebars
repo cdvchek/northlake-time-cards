@@ -1,0 +1,35 @@
+<link rel="stylesheet" href="../css/admin-manageusers.css">
+<div id="background">
+    {{> navbar}}
+    <div id="users-list">
+        <button id="register-user">Register New User</button>
+        <ul>
+            {{#each users}}
+            <li class="user-li" data-id={{this.user_id}}>{{this.name}}</li>
+            {{/each}}
+        </ul>
+    </div>
+    <div id="user-profile">
+        <h1 id="name-h1"> --- --- --- --- </h1>
+        <p id="email-span"> --- --- --- ---</p>
+        <div id="user-flex">
+            <div>
+                <input id="inpt-password" class="change" type="password" placeholder="Password"> <br>
+                <input id="inpt-password-confirm" class="change" type="password" placeholder="Confirm Password"> <br>
+                <button id="btn-change-password" class="change">Change Password</button>
+            </div>
+            <div>
+                <input id="inpt-email" class="change" type="text" placeholder="Email"> <br>
+                <input id="inpt-email-confirm" class="change" type="text" placeholder="Confirm Email"> <br>
+                <button id="btn-change-email" class="change">Change Email</button>
+            </div>
+            <div>
+                <input id="inpt-name" class="change" type="text" placeholder="Name"> <br>
+                <input id="inpt-name-confirm" class="change" type="text" placeholder="Confirm Name"> <br>
+                <button id="btn-change-name" class="change">Change Name</button>
+            </div>
+        </div>
+        <button id="btn-delete-user">Delete User</button>
+    </div>
+</div>
+<script src="../js/admin-manageusers.js"></script>

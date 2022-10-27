@@ -1,15 +1,17 @@
 #background {
     width: 100vw;
-    height: 100vh;
+    height: calc(100%);
+    min-height: 100vh;
     background-color: gainsboro;
 }
 
 #timecard {
-    height: calc(100% - 100px);
+    height: calc(100%);
+    padding-bottom: 30px;
 }
 
 table {
-    margin-top: 40px;
+    margin-top: 30px;
     margin-left: 2.375%;
     background-color: white;
     border-collapse: collapse;
@@ -18,7 +20,7 @@ table {
 }
 
 table:first-of-type {
-    margin-top: 60px;
+    margin-top: 30px;
 }
 
 table,
@@ -31,7 +33,7 @@ td {
 th,
 td {
     width: 10%;
-    height: 35px;
+    height: 30px;
 }
 
 td {
@@ -63,4 +65,12 @@ div {
     border: none;
     padding: 8px 35px;
     cursor: pointer;
+}
+
+.tr-in>td {
+    border-top: 2px solid;
+}
+
+.tr-out>td {
+    border-bottom: 2px solid;
 }

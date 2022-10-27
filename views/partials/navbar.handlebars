@@ -6,14 +6,20 @@
 {{!-- Admin: Help --}}
 {{!-- Logout --}}
 <link rel="stylesheet" href="../css/navbar.css">
-<nav>
+<nav id="nav" issuper={{isSuper}} isadmin={{isAdmin}}>
     <button id="nav-time-card" class="nav left">Time Card</button>
     <button id="nav-history" class="nav left">History</button>
+    {{#if isSuper}}
     <button id="nav-super-approve" class="nav left">Approve</button>
-    <button id="nav-admin-supervisors" class="nav left">Manage Supervisors</button>
-    <button id="nav-admin-users" class="nav left">Manage Users</button>
+    {{/if}}
+    {{#if isAdmin}}
+    <button id="nav-admin-supervisors" class="nav left">Supervisors</button>
+    <button id="nav-admin-users" class="nav left">Users</button>
+    <button id="nav-admin-timeperiods" class="nav left">Time Periods</button>
+    <button id="nav-admin-submit" class="nav left">Submit Time Cards</button>
+    {{/if}}
     <button id="nav-admin-help" class="nav left">Help</button>
-    <button id="nav-logout" class="nav right">Logout</button>
+    <button id="nav-logout" class="nav left">Logout</button>
 </nav>
 <div id="nav-offset"></div>
 <script src="../../js/navbar.js"></script>

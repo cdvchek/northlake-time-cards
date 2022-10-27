@@ -10,6 +10,7 @@ nav {
     background-color: rgb(9, 139, 175);
     margin: none;
     z-index: 5;
+    text-align: left;
 }
 
 #nav-offset {

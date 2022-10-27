@@ -1,0 +1,27 @@
+<link rel="stylesheet" href="../css/admin-managesupers.css">
+<div id="background">
+    {{> navbar}}
+    <div id="supers-div">
+        <ul>
+            {{#each supers}}
+            {{#if this.isSuper}}
+            <li data-id={{this.user_id}} data-name={{this.nameHyphen}} class="yesSuper user">{{this.name}}<button
+                    class="manageusers" data-id={{this.user_id}}>Manage
+                    Users</button><button class="setsuper removesuper" data-id={{this.user_id}}>Remove
+                    Supervisor</button></li>
+            {{else}}
+            <li data-id={{this.user_id}} data-name={{this.nameHyphen}} class="noSuper user">{{this.name}}<button
+                    class="setsuper addsuper" data-id={{this.user_id}}>Set
+                    Supervisor</button></li>
+            {{/if}}
+            {{/each}}
+        </ul>
+    </div>
+    <div id="users-div">
+        <ul id="supervisees">
+        </ul>
+        <ul id="not-supervisees">
+        </ul>
+    </div>
+</div>
+<script src="../js/admin-managesupers.js"></script>

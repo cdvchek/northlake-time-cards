@@ -5,7 +5,7 @@
 }
 
 #timecard {
-    height: calc(100% - 100px);
+    height: calc(100% - 120px);
 }
 
 table {
@@ -18,7 +18,7 @@ table {
 }
 
 table:first-of-type {
-    margin-top: 60px;
+    margin-top: 50px;
 }
 
 table,
@@ -46,5 +46,5 @@ div {
 #week {
     position: absolute;
     right: 20px;
-    top: 80px;
+    top: 75px;
 }

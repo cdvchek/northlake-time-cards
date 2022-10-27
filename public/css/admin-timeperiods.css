@@ -1,0 +1,9 @@
+#background {
+    width: 100vw;
+    height: 100vh;
+    background-color: gainsboro;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}

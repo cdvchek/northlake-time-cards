@@ -1,0 +1,83 @@
+#background {
+    width: 100vw;
+    height: 100vh;
+    background-color: gainsboro;
+}
+
+#options-div {
+    position: absolute;
+    right: calc(40px + 25%);
+    top: 75px;
+}
+
+#approve-btn {
+    color: white;
+    font-size: 100%;
+    margin: 10px;
+    border: none;
+    padding: 8px 35px;
+    cursor: pointer;
+}
+
+#timecard {
+    height: calc(100% - 120px);
+    display: inline;
+}
+
+#empl-list {
+    position: absolute;
+    right: 10px;
+    top: 70px;
+    background-color: white;
+    width: 25%;
+    height: calc(100% - 80px);
+    border: 1px solid;
+    box-shadow: 0 0 15px grey;
+}
+
+#empl-list>ul>li {
+    list-style: none;
+    position: relative;
+    right: 6%;
+    border: 1px solid;
+    padding: 5px 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+table {
+    margin-top: 40px;
+    margin-left: 2.375%;
+    background-color: white;
+    border-collapse: collapse;
+    width: 70%;
+    box-shadow: 0 0 15px grey;
+    display: inline-table;
+}
+
+table:first-of-type {
+    margin-top: 90px;
+}
+
+table,
+tr,
+th,
+td {
+    border: 1px solid;
+}
+
+tr {
+    height: 28px;
+}
+
+td {
+    text-align: center;
+}
+
+.approved {
+    background-color: rgb(126, 126, 126);
+}
+
+.unapproved {
+    background-color: rgb(9, 139, 175);
+}

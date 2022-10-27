@@ -1,8 +1,24 @@
-const processTimeCard = (timesheet) => {
+const processTimeCard = (timeCells, type = "cell") => {
+    let timesheet = [];
+    const weeklyOffset = 7 // 7 days in a week
+    for (let i = 0; i < timeCells.length; i++) {
+        const row = Math.floor(i / weeklyOffset);
+        const column = i % weeklyOffset;
+        let value = timeCells[i].textContent;
+        if (type === "input") {
+            value = timeCells[i].value;
+        }
+        if (column == 0) {
+            timesheet.push([]);
+        }
+        timesheet[row][column] = value;
+    }
+
     const details = {
         dailyTotals: [0, 0, 0, 0, 0, 0, 0],
         weeklyTotal: 0,
     };
+
     for (let i = 1; i < timesheet.length; i += 2) {
         for (let j = 0; j < timesheet[i].length; j++) {
             // Checking to see if both time in and out are filled out
