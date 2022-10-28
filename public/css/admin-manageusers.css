@@ -64,3 +64,53 @@
     border: none;
     padding: 10px;
 }
+
+#div-titles {
+    margin: 20px 0;
+}
+
+#div-adding-title {
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+.div-title {
+    position: relative;
+    display: list-item;
+    list-style: none;
+    border: 1px solid;
+    background-color: white;
+    margin: 10px;
+    width: 30%;
+    padding: 10px;
+}
+
+.div-title>div {
+    display: inline;
+}
+
+.remove-title-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+.edit-title-btn {
+    position: absolute;
+    right: 85px;
+    top: 10px;
+}
+
+.save-title-btn {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+.cancel-title-btn {
+    display: none;
+    position: absolute;
+    right: 65px;
+    top: 10px;
+}

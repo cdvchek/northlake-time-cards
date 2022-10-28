@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { User, TimeCard, TimeInOut, TimePeriod } = require('../models');
+const { User, TimeCard, TimeInOut, TimePeriod, Title } = require('../models');
 const bcrypt = require('bcrypt');
 const { DateTime } = require('luxon');
 
@@ -31,17 +31,74 @@ function compareTimeInOuts(a, b) {
 router.get("/user-timecard/", async (req, res) => {
     try {
         if (req.session.user) {
+            // Check to see if its a new time period
             const timeperiod = await TimePeriod.findOne({
                 where: {
                     isCurrent: true,
                 }
             });
+            const startDateObj = DateTime.fromISO(timeperiod.dataValues.date_start);
+            const endDateObj = DateTime.fromISO(startDateObj.plus({ days: 14 }).toISODate());
+            const newStartDate = endDateObj.plus({ days: 1 }).toISODate();
+            const nowDateObj = DateTime.now();
+            if (endDateObj.startOf("day") < nowDateObj.startOf("day")) {
+                await TimePeriod.destroy({
+                    where: {
+                        isTwoPrevious: true,
+                    }
+                });
+                await TimePeriod.update({
+                    isPrevious: false,
+                    isTwoPrevious: true,
+                }, {
+                    where: {
+                        isPrevious: true,
+                    }
+                });
+                await TimePeriod.update({
+                    isCurrent: false,
+                    isPrevious: true,
+                }, {
+                    where: {
+                        isCurrent: true,
+                    }
+                });
+                const newTimeperiod = await TimePeriod.create({
+                    date_start: newStartDate,
+                    isCurrent: true,
+                    isPrevious: false,
+                    isTwoPrevious: false,
+                });
+
+                const users = (await User.findAll()).map((user) => user.dataValues);
+                users.forEach(async (user) => {
+                    // Create a new time card associated with the new time period
+                    const newTimeCard = await TimeCard.create({
+                        timeperiod_id: newTimeperiod.timeperiod_id,
+                        user_id: user.user_id,
+                    });
+                    for (let j = 0; j < 2; j++) { // Number of Weeks
+                        for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
+                            await TimeInOut.create({
+                                timecard_id: newTimeCard.timecard_id,
+                                week: j + 1,
+                                order: k + 1,
+                            });
+                        }
+                    }
+                });
+            }
             let hbsObj = {};
-            if (timeperiod !== null) {
+            const currentTimePeriod = (await TimePeriod.findOne({
+                where: {
+                    isCurrent: true,
+                }
+            })).dataValues;
+            if (currentTimePeriod !== null) {
                 const timecard = await TimeCard.findOne({
                     where: {
                         user_id: req.session.user.user_id,
-                        timeperiod_id: timeperiod.timeperiod_id,
+                        timeperiod_id: currentTimePeriod.timeperiod_id,
                     },
                     include: TimeInOut,
                 });
@@ -601,7 +658,7 @@ router.put("/api/timecard-status/:id", async (req, res) => {
 router.get("/api/user-id/:id", async (req, res) => {
     try {
         if (req.session.user && ((req.session.user.user_id === Number(req.params.id)) || (req.session.user.isAdmin))) {
-            const user = await User.findByPk(req.params.id);
+            const user = await User.findByPk(req.params.id, { include: [TimeCard, Title] });
             console.log(user);
             res.json(user);
         } else {
@@ -724,7 +781,26 @@ router.put("/api/edit-supervisees/:id", async (req, res) => {
             res.status(401).json({ msg: "You cannot manipulate this data", msg_type: "UNAUTHORIZED_DATA_MANIPULATE" });
         }
     } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
 
+// API Create Title
+router.post("/api/title/", async (req, res) => {
+    try {
+        if (req.session.user && req.session.user.isAdmin) {
+            const title = await Title.create({
+                name: req.body.titleName,
+                user_id: req.body.userId,
+            });
+            res.json(title)
+        } else {
+            res.status(401).json({ msg: "You cannot create data", msg_type: "UNAUTHORIZED_DATA_CREATE" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
     }
 });
 

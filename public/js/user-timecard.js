@@ -47,7 +47,7 @@ if (hasTimeCard == "true") {
     }
 
     const getValues1 = (e) => {
-        const details = processTimeCard(timeCells1);
+        const details = processTimeCard(timeCells1, "input");
         weeklyTotal.textContent = details.weeklyTotal;
         sundayTotal.textContent = details.dailyTotals[0];
         mondayTotal.textContent = details.dailyTotals[1];
@@ -66,7 +66,7 @@ if (hasTimeCard == "true") {
     getValues1();
 
     const getValues2 = (e) => {
-        const details = processTimeCard(timeCells2);
+        const details = processTimeCard(timeCells2, "input");
         weeklyTotal2.textContent = details.weeklyTotal;
         sundayTotal2.textContent = details.dailyTotals[0];
         mondayTotal2.textContent = details.dailyTotals[1];

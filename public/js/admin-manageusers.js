@@ -9,6 +9,7 @@ const goToNewUser = (e) => {
 registerUserBtn.addEventListener("click", goToNewUser);
 
 // Populating the Profile from clicking on a user 
+const titlesUl = document.getElementById("ul-title");
 const userDiv = document.getElementById("user-flex");
 const nameH1 = document.getElementById("name-h1");
 const emailSpan = document.getElementById("email-span");
@@ -18,11 +19,54 @@ const emailInpt = document.getElementById("inpt-email");
 const emailConfirmInpt = document.getElementById("inpt-email-confirm");
 const nameInpt = document.getElementById("inpt-name");
 const nameConfirmInpt = document.getElementById("inpt-name-confirm");
+let oldTitle = [];
 
 const populateProfile = async (e) => {
     const userId = e.target.getAttribute('data-id');
     const user = await (await fetch('/api/user-id/' + userId)).json();
+    const titleChildren = titlesUl.children;
+    const titleChildrenLength = titleChildren.length
+    for (let i = 0; i < titleChildrenLength; i++) {
+        titleChildren[0].remove();
+    }
+    const titles = user.Titles;
+    for (let numberOfTitles = 0; numberOfTitles < titles.length; numberOfTitles++) {
+        const title = titles[numberOfTitles];
+        oldTitle.push("");
+        const outsideDiv = document.createElement("div");
+        outsideDiv.setAttribute("class", "div-title");
+        const insideDiv = document.createElement("div");
+        insideDiv.setAttribute("contenteditable", "false");
+        insideDiv.textContent = title.name;
+        const editBtn = document.createElement("button");
+        editBtn.setAttribute("data-order", numberOfTitles.toString());
+        editBtn.setAttribute("class", "edit-title-btn");
+        editBtn.textContent = "Edit";
+        editBtn.addEventListener("click", editTitle);
+        const removeBtn = document.createElement("button");
+        removeBtn.setAttribute("data-order", numberOfTitles.toString());
+        removeBtn.setAttribute("class", "remove-title-btn");
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", removeTitle);
+        const cancelBtn = document.createElement("button");
+        cancelBtn.setAttribute("data-order", numberOfTitles.toString());
+        cancelBtn.setAttribute("class", "cancel-title-btn");
+        cancelBtn.textContent = "Cancel";
+        cancelBtn.addEventListener("click", cancelTitle);
+        const saveBtn = document.createElement("button");
+        saveBtn.setAttribute("class", "save-title-btn");
+        saveBtn.setAttribute("data-id", user.user_id);
+        saveBtn.textContent = "Save";
+        saveBtn.addEventListener("click", saveTitle);
 
+        outsideDiv.appendChild(insideDiv);
+        outsideDiv.appendChild(editBtn);
+        outsideDiv.appendChild(removeBtn);
+        outsideDiv.appendChild(saveBtn);
+        outsideDiv.appendChild(cancelBtn);
+
+        titlesUl.appendChild(outsideDiv);
+    }
     nameH1.textContent = user.name;
     emailSpan.textContent = user.email;
     userDiv.setAttribute("data-id", user.user_id);
@@ -214,3 +258,140 @@ const deleteUser = async () => {
 }
 
 deleteUserBtn.addEventListener("click", deleteUser);
+
+// Editing a title
+const editTitleBtns = document.getElementsByClassName("edit-title-btn");
+for (let i = 0; i < editTitleBtns.length; i++) {
+    oldTitle.push("");
+}
+
+const editTitle = (e) => {
+    const children = e.target.parentNode.children;
+    const editIndex = Number(e.target.getAttribute("data-order"));
+    oldTitle[editIndex] = children[0].textContent;
+    children[0].setAttribute("contenteditable", "true");
+    children[1].style.display = "none";
+    children[2].style.display = "none";
+    children[3].style.display = "inline";
+    children[4].style.display = "inline"
+}
+
+for (let i = 0; i < editTitleBtns.length; i++) {
+    const editTitleBtn = editTitleBtns[i];
+    editTitleBtn.addEventListener("click", editTitle);
+}
+
+// Cancelling a title
+const cancelTitleBtns = document.getElementsByClassName("cancel-title-btn");
+
+const cancelTitle = (e) => {
+    const children = e.target.parentNode.children;
+    const cancelIndex = Number(e.target.getAttribute("data-order"));
+    children[0].setAttribute("contenteditable", "false");
+    children[0].textContent = oldTitle[cancelIndex];
+    children[1].style.display = "inline";
+    children[2].style.display = "inline";
+    children[3].style.display = "none";
+    children[4].style.display = "none"
+}
+
+for (let i = 0; i < cancelTitleBtns.length; i++) {
+    const cancelTitleBtn = cancelTitleBtns[i];
+    cancelTitleBtn.addEventListener("click", cancelTitle);
+}
+
+// Removing a title
+const removeTitleBtns = document.getElementsByClassName("remove-title-btn");
+
+const removeTitle = (e) => {
+    // Hit a route to remove the title from the database
+    const removeIndex = Number(e.target.getAttribute("data-order"));
+    e.target.parentNode.remove();
+    oldTitle.splice(removeIndex, 1);
+}
+
+for (let i = 0; i < removeTitleBtns.length; i++) {
+    const removeTitleBtn = removeTitleBtns[i];
+    removeTitleBtn.addEventListener("click", removeTitle);
+}
+
+// Saving a title
+const saveTitleBtns = document.getElementsByClassName("save-title-btn");
+
+const saveTitle = (e) => {
+    // Hit route to update the title
+    const children = e.target.parentNode.children;
+    children[0].setAttribute("contenteditable", "false");
+    children[1].style.display = "inline";
+    children[2].style.display = "inline";
+    children[3].style.display = "none";
+    children[4].style.display = "none"
+}
+
+for (let i = 0; i < saveTitleBtns.length; i++) {
+    const saveTitleBtn = saveTitleBtns[i];
+    saveTitleBtn.addEventListener("click", saveTitle);
+}
+
+// Adding a title
+const addTitleBtn = document.getElementById("btn-add-title");
+const addTitleInpt = document.getElementById("inpt-add-title");
+
+const addTitle = async () => {
+    const titleName = addTitleInpt.value;
+    const userId = userDiv.getAttribute("data-id");
+
+    const titleObj = {
+        titleName,
+        userId,
+    }
+    const addTitleResponse = await fetch("/api/title/", {
+        method: 'POST',
+        body: JSON.stringify(titleObj),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (addTitleResponse.ok) {
+        oldTitle.push("");
+        const outsideDiv = document.createElement("div");
+        outsideDiv.setAttribute("class", "div-title");
+        const insideDiv = document.createElement("div");
+        insideDiv.setAttribute("contenteditable", "false");
+        insideDiv.textContent = titleName;
+        const editBtn = document.createElement("button");
+        const numberOfTitles = titlesUl.children.length;
+        editBtn.setAttribute("data-order", numberOfTitles.toString());
+        editBtn.setAttribute("class", "edit-title-btn");
+        editBtn.textContent = "Edit";
+        editBtn.addEventListener("click", editTitle);
+        const removeBtn = document.createElement("button");
+        removeBtn.setAttribute("data-order", numberOfTitles.toString());
+        removeBtn.setAttribute("class", "remove-title-btn");
+        removeBtn.textContent = "Remove";
+        removeBtn.addEventListener("click", removeTitle);
+        const cancelBtn = document.createElement("button");
+        cancelBtn.setAttribute("data-order", numberOfTitles.toString());
+        cancelBtn.setAttribute("class", "cancel-title-btn");
+        cancelBtn.textContent = "Cancel";
+        cancelBtn.addEventListener("click", cancelTitle);
+        const saveBtn = document.createElement("button");
+        saveBtn.setAttribute("class", "save-title-btn");
+        saveBtn.textContent = "Save";
+        saveBtn.addEventListener("click", saveTitle);
+
+        outsideDiv.appendChild(insideDiv);
+        outsideDiv.appendChild(editBtn);
+        outsideDiv.appendChild(removeBtn);
+        outsideDiv.appendChild(saveBtn);
+        outsideDiv.appendChild(cancelBtn);
+
+        titlesUl.appendChild(outsideDiv);
+        // Display message saying that it went ok
+    } else {
+        // Display message saying that something went wrong
+    }
+}
+
+addTitleBtn.addEventListener("click", addTitle);
