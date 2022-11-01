@@ -7,10 +7,12 @@ let selectedSupervisorId = "-1";
 const addSupervisee = async (e) => {
     const superviseeId = e.target.getAttribute("data-id");
     const superviseeName = e.target.getAttribute("data-name").replaceAll("@", " ");
+    const titleId = e.target.getAttribute("data-titleid");
 
     const updateSuperviseesObj = {
         editType: "set",
         superviseeId: superviseeId,
+        titleId,
     }
 
     const updateSuperviseesResponse = await fetch("/api/edit-supervisees/" + selectedSupervisorId, {
@@ -24,25 +26,28 @@ const addSupervisee = async (e) => {
     if (updateSuperviseesResponse.ok) {
         const newSupervisorLi = document.createElement("li");
         newSupervisorLi.setAttribute("data-id", superviseeId);
-        newSupervisorLi.setAttribute("data-name", superviseeName.replaceAll(" ", "@"))
+        newSupervisorLi.setAttribute("data-name", superviseeName.replaceAll(" ", "@"));
+        newSupervisorLi.setAttribute("data-titleid", titleId);
         newSupervisorLi.setAttribute("class", "yesSupervisee");
-        newSupervisorLi.textContent = superviseeName;
+        newSupervisorLi.textContent = e.target.textContent;
         newSupervisorLi.addEventListener("click", removeSupervisee);
 
         superviseesUl.appendChild(newSupervisorLi);
         e.target.remove();
     } else {
-        // Display a message saying something went wrong
+        displayMessage("Something went wrong, please refresh and try again if the issue isn't fixed.")
     }
 }
 
 const removeSupervisee = async (e) => {
     const userId = e.target.getAttribute("data-id");
     const userName = e.target.getAttribute("data-name").replaceAll("@", " ");
+    const titleId = e.target.getAttribute("data-titleid");
 
     const updateSuperviseesObj = {
         editType: "remove",
         superviseeId: userId,
+        titleId,
     }
 
     const updateSuperviseesResponse = await fetch("/api/edit-supervisees/" + selectedSupervisorId, {
@@ -56,16 +61,16 @@ const removeSupervisee = async (e) => {
     if (updateSuperviseesResponse.ok) {
         const newUserLi = document.createElement("li");
         newUserLi.setAttribute("data-id", userId);
-        newUserLi.setAttribute("data-name", userName.replaceAll(" ", "@"))
+        newUserLi.setAttribute("data-name", userName.replaceAll(" ", "@"));
+        newUserLi.setAttribute("data-titleid", titleId);
         newUserLi.setAttribute("class", "noSupervisee");
-        newUserLi.textContent = userName;
+        newUserLi.textContent = e.target.textContent;
         newUserLi.addEventListener("click", addSupervisee);
-
 
         notSuperviseesUl.appendChild(newUserLi);
         e.target.remove();
     } else {
-        // Display a message saying something went wrong
+        displayMessage("Something went wrong, please refresh and try again if the issue isn't fixed.")
     }
 }
 
@@ -84,7 +89,7 @@ const manageUsers = async (e) => {
 
     const userId = e.target.getAttribute("data-id");
     selectedSupervisorId = userId;
-    const users = await (await fetch("/api/users/")).json();
+    const users = await (await fetch("/api/users-titles/")).json();
     const supervisees = (await (await fetch("/api/supervisees/" + userId)).json()).supervisees;
     const superviseesArray = supervisees.split(",");
 
@@ -93,9 +98,12 @@ const manageUsers = async (e) => {
     users.forEach((user) => {
         let isSupervisee = false;
         for (let i = 0; i < superviseesArray.length; i++) {
-            if (user.user_id === Number(superviseesArray[i])) {
-                isSupervisee = true;
-                break;
+            const superviseeId = Number(superviseesArray[i].split("-")[0]);
+            if (user.user_id === superviseeId) {
+                const superviseeTitleId = superviseesArray[i].split("-")[1];
+                if (user.titleId === Number(superviseeTitleId)) {
+                    isSupervisee = true;
+                }
             }
         };
         if (isSupervisee) {
@@ -111,8 +119,13 @@ const manageUsers = async (e) => {
         const newLi = document.createElement("li");
         newLi.setAttribute("data-id", supervisee.user_id);
         newLi.setAttribute("data-name", supervisee.name.replaceAll(" ", "@"))
+        newLi.setAttribute("data-titleid", supervisee.titleId);
         newLi.setAttribute("class", "yesSupervisee");
-        newLi.textContent = supervisee.name;
+        if (supervisee.multTitle) {
+            newLi.textContent = supervisee.name + " - " + supervisee.titleName;
+        } else {
+            newLi.textContent = supervisee.name;
+        }
         newLi.addEventListener("click", removeSupervisee);
 
         superviseesUl.appendChild(newLi);
@@ -122,9 +135,14 @@ const manageUsers = async (e) => {
 
         const newLi = document.createElement("li");
         newLi.setAttribute("data-id", user.user_id);
-        newLi.setAttribute("data-name", user.name.replaceAll(" ", "@"))
+        newLi.setAttribute("data-name", user.name.replaceAll(" ", "@"));
+        newLi.setAttribute("data-titleid", user.titleId);
         newLi.setAttribute("class", "noSupervisee");
-        newLi.textContent = user.name;
+        if (user.multTitle) {
+            newLi.textContent = user.name + " - " + user.titleName;
+        } else {
+            newLi.textContent = user.name;
+        }
         newLi.addEventListener("click", addSupervisee);
 
         notSuperviseesUl.appendChild(newLi);
@@ -162,6 +180,8 @@ const addSuper = async (e) => {
         const [manageUsersBtn, removeSuperBtn] = parentLi.children;
         manageUsersBtn.addEventListener("click", manageUsers);
         removeSuperBtn.addEventListener("click", removeSuper);
+    } else {
+        displayMessage("Something went wrong, please refresh and try again if the issue isn't fixed.")
     }
 }
 
@@ -196,6 +216,8 @@ const removeSuper = async (e) => {
         parentLi.innerHTML = `${userName}<button class="setsuper addsuper" data-id="${userId}">Set Supervisor</button></li>`;
         const [addSuperBtn] = parentLi.children;
         addSuperBtn.addEventListener("click", addSuper);
+    } else {
+        displayMessage("Something went wrong, please refresh and try again if the issue isn't fixed.")
     }
 }
 

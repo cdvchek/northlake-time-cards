@@ -14,6 +14,10 @@ Title.init(
             type: DataTypes.STRING,
             allowNull: false,
         },
+        supervisor_id: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        }
     },
     {
         sequelize,

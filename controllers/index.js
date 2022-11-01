@@ -5,11 +5,13 @@ const { DateTime } = require('luxon');
 
 // Home / Sign In - OPEN
 router.get("/", (req, res) => {
+    req.session.destroy();
     res.render("signin");
 });
 
 // New Admin Registration - OPEN
 router.get("/new-admin/", (req, res) => {
+    req.session.destroy();
     res.render("new-admin");
 });
 
@@ -37,64 +39,71 @@ router.get("/user-timecard/", async (req, res) => {
                     isCurrent: true,
                 }
             });
-            const startDateObj = DateTime.fromISO(timeperiod.dataValues.date_start);
-            const endDateObj = DateTime.fromISO(startDateObj.plus({ days: 14 }).toISODate());
-            const newStartDate = endDateObj.plus({ days: 1 }).toISODate();
-            const nowDateObj = DateTime.now();
-            if (endDateObj.startOf("day") < nowDateObj.startOf("day")) {
-                await TimePeriod.destroy({
-                    where: {
-                        isTwoPrevious: true,
-                    }
-                });
-                await TimePeriod.update({
-                    isPrevious: false,
-                    isTwoPrevious: true,
-                }, {
-                    where: {
-                        isPrevious: true,
-                    }
-                });
-                await TimePeriod.update({
-                    isCurrent: false,
-                    isPrevious: true,
-                }, {
-                    where: {
-                        isCurrent: true,
-                    }
-                });
-                const newTimeperiod = await TimePeriod.create({
-                    date_start: newStartDate,
-                    isCurrent: true,
-                    isPrevious: false,
-                    isTwoPrevious: false,
-                });
-
-                const users = (await User.findAll()).map((user) => user.dataValues);
-                users.forEach(async (user) => {
-                    // Create a new time card associated with the new time period
-                    const newTimeCard = await TimeCard.create({
-                        timeperiod_id: newTimeperiod.timeperiod_id,
-                        user_id: user.user_id,
-                    });
-                    for (let j = 0; j < 2; j++) { // Number of Weeks
-                        for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
-                            await TimeInOut.create({
-                                timecard_id: newTimeCard.timecard_id,
-                                week: j + 1,
-                                order: k + 1,
-                            });
+            if (timeperiod !== null) {
+                const startDateObj = DateTime.fromISO(timeperiod.dataValues.date_start);
+                const endDateObj = DateTime.fromISO(startDateObj.plus({ days: 14 }).toISODate());
+                const newStartDate = endDateObj.plus({ days: 1 }).toISODate();
+                const nowDateObj = DateTime.now();
+                if (endDateObj.startOf("day") < nowDateObj.startOf("day")) {
+                    await TimePeriod.destroy({
+                        where: {
+                            isTwoPrevious: true,
                         }
-                    }
-                });
+                    });
+                    await TimePeriod.update({
+                        isPrevious: false,
+                        isTwoPrevious: true,
+                    }, {
+                        where: {
+                            isPrevious: true,
+                        }
+                    });
+                    await TimePeriod.update({
+                        isCurrent: false,
+                        isPrevious: true,
+                    }, {
+                        where: {
+                            isCurrent: true,
+                        }
+                    });
+                    const newTimeperiod = await TimePeriod.create({
+                        date_start: newStartDate,
+                        isCurrent: true,
+                        isPrevious: false,
+                        isTwoPrevious: false,
+                    });
+
+                    const users = (await User.findAll({ include: Title, })).map((user) => user.dataValues);
+                    users.forEach(async (user) => {
+                        const titles = user.Titles;
+                        titles.forEach(async (title) => {
+                            // Create a new time card associated with the new time period
+                            const newTimeCard = await TimeCard.create({
+                                timeperiod_id: newTimeperiod.timeperiod_id,
+                                user_id: user.user_id,
+                                title_id: title.title_id,
+                            });
+                            for (let j = 0; j < 2; j++) { // Number of Weeks
+                                for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
+                                    await TimeInOut.create({
+                                        timecard_id: newTimeCard.timecard_id,
+                                        week: j + 1,
+                                        order: k + 1,
+                                    });
+                                }
+                            }
+                        });
+                    });
+                }
             }
             let hbsObj = {};
-            const currentTimePeriod = (await TimePeriod.findOne({
+            let currentTimePeriod = (await TimePeriod.findOne({
                 where: {
                     isCurrent: true,
                 }
-            })).dataValues;
+            }));
             if (currentTimePeriod !== null) {
+                currentTimePeriod = currentTimePeriod.dataValues;
                 const timecard = await TimeCard.findOne({
                     where: {
                         user_id: req.session.user.user_id,
@@ -323,6 +332,15 @@ router.post("/api/admin-signup", async (req, res) => {
                 isSuper: true,
             });
 
+            const bodyTitles = req.body.titles;
+
+            bodyTitles.forEach(async (title) => {
+                const newTitle = await Title.create({
+                    name: title.name,
+                    user_id: newAdmin.user_id,
+                });
+            });
+
             res.status(200).json({ newAdmin });
 
         } else {
@@ -346,42 +364,58 @@ router.post("/api/signup", async (req, res) => {
                 isAdmin: false,
             })).dataValues;
 
-            console.log(newUser);
+            const bodyTitles = req.body.titles;
+            let titles = [];
+            bodyTitles.forEach(async (title) => {
+                const newTitle = (await Title.create({
+                    name: title.name,
+                    user_id: newUser.user_id,
+                })).map((title) => title.dataValues);
+                titles.push(newTitle);
+            });
 
             const timePeriodCurrent = (await TimePeriod.findOne({
                 where: {
                     isCurrent: true,
                 }
             })).dataValues;
-            const timePeriodPrevious = (await TimePeriod.findOne({
-                where: {
-                    isPrevious: true,
-                }
-            })).dataValues;
-            const timePeriodTwoPrevious = (await TimePeriod.findOne({
-                where: {
-                    isTwoPrevious: true,
-                }
-            })).dataValues;
-            const timePeriods = [timePeriodCurrent, timePeriodPrevious, timePeriodTwoPrevious];
 
-            for (let i = 0; i < timePeriods.length; i++) {
-                const timeCard = await TimeCard.create({
-                    timeperiod_id: timePeriods[i].timeperiod_id,
-                    user_id: newUser.user_id,
-                });
-                for (let j = 0; j < 2; j++) { // Number of Weeks
-                    for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
-                        await TimeInOut.create({
-                            timecard_id: timeCard.timecard_id,
-                            week: j + 1,
-                            order: k + 1,
-                        });
+            if (timePeriodCurrent !== undefined) {
+
+                const timePeriodPrevious = (await TimePeriod.findOne({
+                    where: {
+                        isPrevious: true,
                     }
-                }
-            }
+                })).dataValues;
+                const timePeriodTwoPrevious = (await TimePeriod.findOne({
+                    where: {
+                        isTwoPrevious: true,
+                    }
+                })).dataValues;
+                const timePeriods = [timePeriodCurrent, timePeriodPrevious, timePeriodTwoPrevious];
 
-            res.json(newUser);
+                for (let i = 0; i < timePeriods.length; i++) {
+                    titles.forEach(async (title) => {
+                        const timeCard = await TimeCard.create({
+                            timeperiod_id: timePeriods[i].timeperiod_id,
+                            user_id: newUser.user_id,
+                            title_id: title.title_id,
+                        });
+                        for (let j = 0; j < 2; j++) { // Number of Weeks
+                            for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
+                                await TimeInOut.create({
+                                    timecard_id: timeCard.timecard_id,
+                                    week: j + 1,
+                                    order: k + 1,
+                                });
+                            }
+                        }
+                    });
+                }
+                res.json(newUser);
+            } else {
+                res.status(401).json({ msg: "You must initialize time periods before you can create users.", msg_type: "CANNOT_CREATE_USER" });
+            }
         } else {
             res.status(401).json({ msg: "You do not have the authority to create a user.", msg_type: "CANNOT_CREATE_USER" })
         }
@@ -475,24 +509,28 @@ router.post("/api/init-timeperiods", async (req, res) => {
             });
             const timePeriods = [timePeriodCurrent, timePeriodPrevious, timePeriodTwoPrevious];
 
-            const usersRaw = await User.findAll();
+            const usersRaw = await User.findAll({ include: Title });
             const users = usersRaw.map((user) => user.dataValues);
             users.forEach(async (user) => {
-                for (let i = 0; i < timePeriods.length; i++) {
-                    const timeCard = await TimeCard.create({
-                        timeperiod_id: timePeriods[i].timeperiod_id,
-                        user_id: user.user_id,
-                    });
-                    for (let j = 0; j < 2; j++) { // Number of Weeks
-                        for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
-                            await TimeInOut.create({
-                                timecard_id: timeCard.timecard_id,
-                                week: j + 1,
-                                order: k + 1,
-                            });
+                const titles = user.Titles;
+                titles.forEach(async (title) => {
+                    for (let i = 0; i < timePeriods.length; i++) {
+                        const timeCard = await TimeCard.create({
+                            timeperiod_id: timePeriods[i].timeperiod_id,
+                            user_id: user.user_id,
+                            title_id: title.title_id,
+                        });
+                        for (let j = 0; j < 2; j++) { // Number of Weeks
+                            for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
+                                await TimeInOut.create({
+                                    timecard_id: timeCard.timecard_id,
+                                    week: j + 1,
+                                    order: k + 1,
+                                });
+                            }
                         }
                     }
-                }
+                });
             });
 
             res.status(200).json({ msg: "Everything went fine" });
@@ -505,7 +543,22 @@ router.post("/api/init-timeperiods", async (req, res) => {
     }
 });
 
-// API Get Current Time Card by ID
+// API Get Time Card by timecard ID
+router.get("/api/timecard/:id", async (req, res) => {
+    try {
+        if (req.session.user && req.session.user.isAdmin) {
+            const timecard = await TimeCard.findByPk(req.params.id, { include: TimeInOut });
+            res.json(timecard);
+        } else {
+            res.status(401).json({ msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
+        }
+    } catch (error) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+})
+
+// API Get Current Time Card by user ID
 router.get("/api/timecard-current/:id", async (req, res) => {
     try {
         if (req.session.user && req.session.user.isSuper) {
@@ -531,7 +584,7 @@ router.get("/api/timecard-current/:id", async (req, res) => {
     }
 });
 
-// API Get Previous Time Card by ID
+// API Get Previous Time Card by user ID
 router.get("/api/timecard-previous/:id", async (req, res) => {
     try {
         if (req.session.user && req.session.user.isSuper) {
@@ -557,7 +610,7 @@ router.get("/api/timecard-previous/:id", async (req, res) => {
     }
 });
 
-// API Get Two Previous Time Card by ID
+// API Get Two Previous Time Card by user ID
 router.get("/api/timecard-twoprevious/:id", async (req, res) => {
     try {
         if (req.session.user && req.session.user.isSuper) {
@@ -618,21 +671,16 @@ router.put("/api/timecard", async (req, res) => {
 // API Update Time Card approved
 router.put("/api/timecard-status/:id", async (req, res) => {
     try {
-        if (req.session.user) {
+        if (req.session.user && req.session.user.isSuper) {
             let canApprove = false
-            const timeCardsUserId = (await TimeCard.findOne({
+            const timeCardsTitleId = (await TimeCard.findOne({
                 where: {
                     timecard_id: req.params.id,
                 },
-                include: User,
-            })).dataValues.User.dataValues.user_id;
-            const usersSupervisees = (await User.findByPk(req.session.user.user_id)).dataValues.supervisees.split(",");
-            for (let i = 0; i < usersSupervisees.length; i++) {
-                const superviseeId = usersSupervisees[i];
-                if (timeCardsUserId == superviseeId) {
-                    canApprove = true;
-                    break;
-                }
+            })).dataValues.title_id;
+            const timeCardsUserId = (await Title.findByPk(timeCardsTitleId)).dataValues.supervisor_id;
+            if (req.session.user.user_id === timeCardsUserId) {
+                canApprove = true;
             }
             if ((canApprove)) {
                 const updateTimeCardObj = req.body.updateTimeCardObj;
@@ -659,7 +707,6 @@ router.get("/api/user-id/:id", async (req, res) => {
     try {
         if (req.session.user && ((req.session.user.user_id === Number(req.params.id)) || (req.session.user.isAdmin))) {
             const user = await User.findByPk(req.params.id, { include: [TimeCard, Title] });
-            console.log(user);
             res.json(user);
         } else {
             res.status(401).json({ msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
@@ -685,7 +732,6 @@ router.put("/api/user-id/:id", async (req, res) => {
                 },
                 individualHooks: useHooks,
             });
-            console.log(updatedUser);
             res.json(updatedUser);
         } else {
             res.status(401).json({ msg: "You cannot manipulate this data", msg_type: "UNAUTHORIZED_DATA_MANIPULATE" });
@@ -718,12 +764,43 @@ router.delete("/api/user-id/:id", async (req, res) => {
     }
 });
 
+const insertIntoArray = (array, index, inserting) => {
+    const preIndexArray = array.slice(0, index);
+    console.log(preIndexArray);
+    const postIndexArray = array.slice(index, array.length);
+    console.log(postIndexArray);
+    const newArray = [...preIndexArray, inserting, ...postIndexArray]
+    console.log("NewArray: ", newArray);
+    return newArray;
+}
+
 // API Get All Users
-router.get("/api/users", async (req, res) => {
+router.get("/api/users-titles/", async (req, res) => {
     try {
         if (req.session.user && req.session.user.isAdmin) {
-            const users = await User.findAll();
-            res.json(users);
+            const users = (await User.findAll({ include: Title })).map((user) => user.dataValues);
+            for (let i = 0; i < users.length; i++) {
+                const user = users[i];
+                users[i].Titles = user.Titles.map((title) => title.dataValues);
+            }
+
+            let deployUsers = [];
+            for (let i = 0; i < users.length; i++) {
+                const user = users[i];
+                const multTitle = (user.Titles.length > 1);
+                for (let j = 0; j < user.Titles.length; j++) {
+                    const title = user.Titles[j];
+                    const titleUser = {
+                        ...user,
+                    }
+                    titleUser.name = user.name;
+                    titleUser.multTitle = multTitle;
+                    titleUser.titleId = title.title_id;
+                    titleUser.titleName = title.name;
+                    deployUsers.push(titleUser);
+                }
+            }
+            res.json(deployUsers);
         } else {
             res.status(401).json({ msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
         }
@@ -759,13 +836,17 @@ router.put("/api/edit-supervisees/:id", async (req, res) => {
             const supervisor = (await User.findByPk(supervisorId)).dataValues;
             const superviseesString = supervisor.supervisees;
             let superviseesArray = superviseesString.split(",");
+            let superviseeString = superviseeId + "-" + req.body.titleId;
+            let supervisorForTitle;
             if (req.body.editType === "set") {
-                superviseesArray.push(superviseeId);
+                superviseesArray.push(superviseeString);
+                supervisorForTitle = supervisorId;
             } else if (req.body.editType === "remove") {
-                const superviseeIndex = superviseesArray.indexOf(superviseeId);
+                const superviseeIndex = superviseesArray.indexOf(superviseeString);
                 if (superviseeIndex > -1) {
                     superviseesArray.splice(superviseeIndex, 1);
                 }
+                supervisorForTitle = null;
             }
             const newSuperviseesString = superviseesArray.join(",");
             const updatedSupervisor = await User.update({
@@ -776,7 +857,15 @@ router.put("/api/edit-supervisees/:id", async (req, res) => {
                 }
             });
 
-            res.json(updatedSupervisor);
+            const updatedTitle = await Title.update({
+                supervisor_id: supervisorForTitle,
+            }, {
+                where: {
+                    title_id: Number(req.body.titleId),
+                }
+            });
+
+            res.json({ supervisor: updatedSupervisor, title: updatedTitle, });
         } else {
             res.status(401).json({ msg: "You cannot manipulate this data", msg_type: "UNAUTHORIZED_DATA_MANIPULATE" });
         }
@@ -790,13 +879,113 @@ router.put("/api/edit-supervisees/:id", async (req, res) => {
 router.post("/api/title/", async (req, res) => {
     try {
         if (req.session.user && req.session.user.isAdmin) {
+            const userId = req.body.userId;
             const title = await Title.create({
                 name: req.body.titleName,
-                user_id: req.body.userId,
+                user_id: userId,
             });
-            res.json(title)
+
+            const timePeriodCurrent = (await TimePeriod.findOne({
+                where: {
+                    isCurrent: true,
+                }
+            })).dataValues;
+
+            const timePeriodPrevious = (await TimePeriod.findOne({
+                where: {
+                    isPrevious: true,
+                }
+            })).dataValues;
+            const timePeriodTwoPrevious = (await TimePeriod.findOne({
+                where: {
+                    isTwoPrevious: true,
+                }
+            })).dataValues;
+            const timePeriods = [timePeriodCurrent, timePeriodPrevious, timePeriodTwoPrevious];
+
+            for (let i = 0; i < timePeriods.length; i++) {
+                const timeCard = await TimeCard.create({
+                    timeperiod_id: timePeriods[i].timeperiod_id,
+                    user_id: userId,
+                    title_id: title.title_id,
+                });
+                for (let j = 0; j < 2; j++) { // Number of Weeks
+                    for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
+                        await TimeInOut.create({
+                            timecard_id: timeCard.timecard_id,
+                            week: j + 1,
+                            order: k + 1,
+                        });
+                    }
+                }
+            }
+
+            res.json(title);
         } else {
             res.status(401).json({ msg: "You cannot create data", msg_type: "UNAUTHORIZED_DATA_CREATE" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
+
+// API Delete Title
+router.delete("/api/title/:id", async (req, res) => {
+    try {
+        if (req.session.user && req.session.user.isAdmin) {
+            const title = (await Title.findByPk(req.params.id)).dataValues;
+            const supervisorId = title.supervisor_id;
+            const deletedTitle = await Title.destroy({
+                where: {
+                    title_id: req.params.id
+                }
+            });
+            const supervisorRaw = (await User.findByPk(supervisorId));
+            if (supervisorRaw !== undefined) {
+                const supervisor = supervisorRaw.dataValues;
+                const superviseesArray = supervisor.supervisees.split(",");
+                for (let i = 0; i < superviseesArray.length; i++) {
+                    const title_id = superviseesArray[i].split("-")[1];
+                    if (title_id === req.params.id) {
+                        superviseesArray.splice(i, 1);
+                        break;
+                    }
+                }
+                const newSupervisees = superviseesArray.join(",");
+                const updatedSupervisor = await User.update({
+                    supervisees: newSupervisees,
+                }, {
+                    where: {
+                        user_id: supervisorId,
+                    }
+                });
+                res.json({ deletedTitle: deletedTitle, updatedSupervisor: updatedSupervisor, });
+            } else {
+                res.json({ deletedTitle: deletedTitle });
+            }
+        } else {
+            res.status(401).json({ msg: "You cannot delete data", msg_type: "UNAUTHORIZED_DATA_DELETE" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
+
+// API Save Title
+router.put("/api/title/:id", async (req, res) => {
+    try {
+        if (req.session.user && req.session.user.isAdmin) {
+            const updateObj = req.body.updateObj;
+            const updatedTitle = await Title.update(updateObj, {
+                where: {
+                    title_id: req.params.id,
+                }
+            });
+            res.json(updatedTitle);
+        } else {
+            res.status(401).json({ msg: "You cannot manipulate this data", msg_type: "UNAUTHORIZED_DATA_MANIPULATE" });
         }
     } catch (err) {
         console.log(err);

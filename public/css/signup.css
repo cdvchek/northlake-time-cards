@@ -8,7 +8,9 @@
 
 #div-signup-box {
     width: 470px;
-    height: 520px;
+    max-height: 650px;
+    overflow-y: scroll;
+    overflow-x: hidden;
     margin: auto;
     background: white;
     box-shadow: 0 0 15px grey;

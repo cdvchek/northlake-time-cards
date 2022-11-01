@@ -32,6 +32,12 @@ User.hasMany(Title, {
 });
 Title.belongsTo(User, { foreignKey: 'user_id' });
 
+Title.hasMany(TimeCard, {
+    foreignKey: 'title_id',
+    onDelete: 'CASCADE',
+});
+TimeCard.belongsTo(Title, { foreignKey: 'title_id' });
+
 
 module.exports = {
     User,

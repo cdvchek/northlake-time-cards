@@ -19,10 +19,12 @@ const emailInpt = document.getElementById("inpt-email");
 const emailConfirmInpt = document.getElementById("inpt-email-confirm");
 const nameInpt = document.getElementById("inpt-name");
 const nameConfirmInpt = document.getElementById("inpt-name-confirm");
+const viewTimeCardBtn = document.getElementById("btn-view-timecards");
 let oldTitle = [];
 
 const populateProfile = async (e) => {
     const userId = e.target.getAttribute('data-id');
+    viewTimeCardBtn.setAttribute("data-id", userId);
     const user = await (await fetch('/api/user-id/' + userId)).json();
     const titleChildren = titlesUl.children;
     const titleChildrenLength = titleChildren.length
@@ -45,6 +47,7 @@ const populateProfile = async (e) => {
         editBtn.addEventListener("click", editTitle);
         const removeBtn = document.createElement("button");
         removeBtn.setAttribute("data-order", numberOfTitles.toString());
+        removeBtn.setAttribute("data-titleid", title.title_id.toString());
         removeBtn.setAttribute("class", "remove-title-btn");
         removeBtn.textContent = "Remove";
         removeBtn.addEventListener("click", removeTitle);
@@ -55,7 +58,7 @@ const populateProfile = async (e) => {
         cancelBtn.addEventListener("click", cancelTitle);
         const saveBtn = document.createElement("button");
         saveBtn.setAttribute("class", "save-title-btn");
-        saveBtn.setAttribute("data-id", user.user_id);
+        saveBtn.setAttribute("data-titleid", title.title_id.toString());
         saveBtn.textContent = "Save";
         saveBtn.addEventListener("click", saveTitle);
 
@@ -107,24 +110,24 @@ const changePassword = async () => {
                 });
                 if (changePasswordResponse.ok) {
                     // display password changed message
-                    console.log("Password was changed");
+                    displayMessage("Password has been changed!");
                     passwordInpt.value = "";
                     passwordConfirmInpt.value = "";
                 } else {
                     // display something went wrong
-                    console.log("Something went wrong");
+                    displayMessage("Something went wrong, please refresh and try again.");
                 }
             } else {
                 // display message saying the passwords need to be the same
-                console.log("Passwords do not match");
+                displayMessage("Passwords do not match.")
             }
         } else {
             // display message saying the password cant be set to nothing
-            console.log("Passwords cannot be set to nothing");
+            displayMessage("Please enter a password before changing.")
         }
     } else {
         // display message saying you need to select a user before updating a password
-        console.log("Select a user before changing a password");
+        displayMessage("Please select a user before changing passwords.")
     }
 }
 
@@ -156,24 +159,24 @@ const changeEmail = async () => {
                 });
                 if (changeEmailResponse.ok) {
                     // display password changed message
-                    console.log("Email was changed");
+                    displayMessage("Email was changed!");
                     emailInpt.value = "";
                     emailConfirmInpt.value = "";
                 } else {
                     // display something went wrong
-                    console.log("Something went wrong");
+                    displayMessage("Something went wrong, please refresh and try again.");
                 }
             } else {
                 // display message saying the passwords need to be the same
-                console.log("Emails do not match");
+                displayMessage("Emails must match.");
             }
         } else {
             // display message saying the password cant be set to nothing
-            console.log("Emails cannot be set to nothing");
+            displayMessage("Please enter an email.");
         }
     } else {
         // display message saying you need to select a user before updating a password
-        console.log("Select a user before changing an email");
+        displayMessage("Please select a user before changing an email.");
     }
 }
 
@@ -205,24 +208,24 @@ const changeName = async () => {
                 });
                 if (changeNameResponse.ok) {
                     // display password changed message
-                    console.log("Name was changed");
+                    displayMessage("Name was changed!");
                     nameInpt.value = "";
                     nameConfirmInpt.value = "";
                 } else {
                     // display something went wrong
-                    console.log("Something went wrong");
+                    displayMessage("Something went wrong, please refresh and try again.");
                 }
             } else {
                 // display message saying the passwords need to be the same
-                console.log("Names do not match");
+                displayMessage("Names do not match.");
             }
         } else {
             // display message saying the password cant be set to nothing
-            console.log("Names cannot be set to nothing");
+            displayMessage("Please enter a name.");
         }
     } else {
         // display message saying you need to select a user before updating a password
-        console.log("Select a user before changing a name");
+        displayMessage("Please select a user before changing a name.");
     }
 }
 
@@ -248,12 +251,12 @@ const deleteUser = async () => {
                 }
             } else {
                 // display message that user has been deleted
-                console.log("User has been deleted");
+                displayMessage("User has been deleted");
             }
         }
     } else {
         // display message saying you need to select a user before updating a password
-        console.log("Select a user before deleting");
+        displayMessage("Please select a user before deleting");
     }
 }
 
@@ -303,11 +306,23 @@ for (let i = 0; i < cancelTitleBtns.length; i++) {
 // Removing a title
 const removeTitleBtns = document.getElementsByClassName("remove-title-btn");
 
-const removeTitle = (e) => {
+const removeTitle = async (e) => {
     // Hit a route to remove the title from the database
-    const removeIndex = Number(e.target.getAttribute("data-order"));
-    e.target.parentNode.remove();
-    oldTitle.splice(removeIndex, 1);
+    const titleId = e.target.getAttribute("data-titleid");
+    const removeResponse = await fetch("/api/title/" + titleId, {
+        method: 'DELETE',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (removeResponse.ok) {
+        const removeIndex = Number(e.target.getAttribute("data-order"));
+        e.target.parentNode.remove();
+        oldTitle.splice(removeIndex, 1);
+    } else {
+        // display a message saying something went wrong
+    }
 }
 
 for (let i = 0; i < removeTitleBtns.length; i++) {
@@ -318,14 +333,33 @@ for (let i = 0; i < removeTitleBtns.length; i++) {
 // Saving a title
 const saveTitleBtns = document.getElementsByClassName("save-title-btn");
 
-const saveTitle = (e) => {
+const saveTitle = async (e) => {
     // Hit route to update the title
-    const children = e.target.parentNode.children;
-    children[0].setAttribute("contenteditable", "false");
-    children[1].style.display = "inline";
-    children[2].style.display = "inline";
-    children[3].style.display = "none";
-    children[4].style.display = "none"
+    const newName = e.target.parentNode.children[0].textContent;
+    const updateTitleObj = {
+        updateObj: {
+            name: newName,
+        }
+    }
+    const titleId = e.target.getAttribute("data-titleid");
+    const saveTitleResponse = await fetch("/api/title/" + titleId, {
+        method: 'PUT',
+        body: JSON.stringify(updateTitleObj),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+
+    if (saveTitleResponse.ok) {
+        const children = e.target.parentNode.children;
+        children[0].setAttribute("contenteditable", "false");
+        children[1].style.display = "inline";
+        children[2].style.display = "inline";
+        children[3].style.display = "none";
+        children[4].style.display = "none";
+    } else {
+        // display a message saying something went wrong
+    }
 }
 
 for (let i = 0; i < saveTitleBtns.length; i++) {
@@ -354,6 +388,7 @@ const addTitle = async () => {
     });
 
     if (addTitleResponse.ok) {
+        const title = await addTitleResponse.json();
         oldTitle.push("");
         const outsideDiv = document.createElement("div");
         outsideDiv.setAttribute("class", "div-title");
@@ -369,6 +404,7 @@ const addTitle = async () => {
         const removeBtn = document.createElement("button");
         removeBtn.setAttribute("data-order", numberOfTitles.toString());
         removeBtn.setAttribute("class", "remove-title-btn");
+        removeBtn.setAttribute("data-titleid", title.title_id.toString());
         removeBtn.textContent = "Remove";
         removeBtn.addEventListener("click", removeTitle);
         const cancelBtn = document.createElement("button");
@@ -378,6 +414,7 @@ const addTitle = async () => {
         cancelBtn.addEventListener("click", cancelTitle);
         const saveBtn = document.createElement("button");
         saveBtn.setAttribute("class", "save-title-btn");
+        saveBtn.setAttribute("data-titleid", title.title_id.toString());
         saveBtn.textContent = "Save";
         saveBtn.addEventListener("click", saveTitle);
 
@@ -395,3 +432,16 @@ const addTitle = async () => {
 }
 
 addTitleBtn.addEventListener("click", addTitle);
+
+const viewTimeCards = async (e) => {
+    const userId = e.target.getAttribute("data-id");
+
+    if (userId !== null) {
+        setupModalTimecards(userId);
+    } else {
+        // display a message saying that you need to select a user before viewing timecards
+    }
+
+}
+
+viewTimeCardBtn.addEventListener("click", viewTimeCards);
