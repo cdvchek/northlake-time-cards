@@ -23,14 +23,19 @@ const selectTimePeriod = document.getElementById("week-choice");
 // Grabbing the approve button
 const approveBtnEl = document.getElementById("approve-btn");
 
+// Grabbing the ready span
+const readySpan = document.getElementById("span-ready");
+
 // Keeping track of the selected time card
 let selectedTimeCard = -1;
 
 const populateTimecard = async (e) => {
     const superviseeId = e.target.getAttribute("data-id");
+    const titleId = e.target.getAttribute("data-titleid");
     let timeperiod = "current"
     if (e.target.nodeName === "LI") {
         selectTimePeriod.setAttribute("data-id", superviseeId);
+        selectTimePeriod.setAttribute("data-titleid", titleId);
         setSelectedValue(selectTimePeriod, "Current Period");
     } else {
         if (superviseeId === undefined) {
@@ -39,13 +44,20 @@ const populateTimecard = async (e) => {
         timeperiod = e.target.value;
     }
     // Fetching the Data
-    const timecardData = await (await fetch("/api/timecard-" + timeperiod + "/" + superviseeId)).json();
+    const timecardData = await (await fetch("/api/timecards/timecard-" + timeperiod + "/" + titleId)).json();
     if (timecardData.isApproved) {
         approveBtnEl.setAttribute("class", "approved");
         approveBtnEl.textContent = "Unapprove";
     } else {
         approveBtnEl.setAttribute("class", "unapproved");
         approveBtnEl.textContent = "Approve";
+    }
+    if (timecardData.isReadyToBeApproved) {
+        readySpan.textContent = "Time Card Ready";
+        readySpan.setAttribute("data-isready", "true");
+    } else {
+        readySpan.textContent = "Time Card Not Ready";
+        readySpan.setAttribute("data-isready", "false");
     }
     selectedTimeCard = timecardData.timecard_id;
     const weekOneTimeInOuts = timecardData.TimeInOuts.filter((timeInOut) => (timeInOut.week === 1));
@@ -228,35 +240,71 @@ selectTimePeriod.addEventListener("change", populateTimecard);
 // Approving the time card
 const approveTimeCard = async (e) => {
     if (selectedTimeCard !== -1) {
+        const isReady = readySpan.getAttribute("data-isready");
         let approving = true;
         if (e.target.getAttribute("class") === "approved") {
             approving = false
         }
-        const approveObj = {
-            updateTimeCardObj: {
-                isApproved: approving,
+        if ((isReady === "true") || !approving) {
+            const approveObj = {
+                updateTimeCardObj: {
+                    isApproved: approving,
+                }
             }
-        }
-        const approveResponse = await fetch("/api/timecard-status/" + selectedTimeCard.toString(), {
-            method: "PUT",
-            body: JSON.stringify(approveObj),
-            headers: {
-                "Content-Type": "application/json"
-            },
-        });
+            const approveResponse = await fetch("/api/timecards/timecard-status/" + selectedTimeCard.toString(), {
+                method: "PUT",
+                body: JSON.stringify(approveObj),
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            });
 
-        if (approveResponse.ok) {
-            // display message time card is approved
-            if (approving) {
-                approveBtnEl.setAttribute("class", "approved");
-                approveBtnEl.textContent = "Unapprove";
+            if (approveResponse.ok) {
+                // display message time card is approved
+                if (approving) {
+                    approveBtnEl.setAttribute("class", "approved");
+                    approveBtnEl.textContent = "Unapprove";
+                } else {
+                    approveBtnEl.setAttribute("class", "unapproved");
+                    approveBtnEl.textContent = "Approve";
+                }
             } else {
-                approveBtnEl.setAttribute("class", "unapproved");
-                approveBtnEl.textContent = "Approve";
+                // display message something went wrong
+                console.log("yikes");
             }
         } else {
-            // display message something went wrong
-            console.log("yikes");
+            if (window.confirm("The Time Card you are trying to approve has not been marked as ready. Once you approve this time card, it will lock and not be editable in the future.\nDo you wish to proceed?")) {
+                let approving = true;
+                if (e.target.getAttribute("class") === "approved") {
+                    approving = false
+                }
+                const approveObj = {
+                    updateTimeCardObj: {
+                        isApproved: approving,
+                    }
+                }
+                const approveResponse = await fetch("/api/timecards/timecard-status/" + selectedTimeCard.toString(), {
+                    method: "PUT",
+                    body: JSON.stringify(approveObj),
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                });
+
+                if (approveResponse.ok) {
+                    // display message time card is approved
+                    if (approving) {
+                        approveBtnEl.setAttribute("class", "approved");
+                        approveBtnEl.textContent = "Unapprove";
+                    } else {
+                        approveBtnEl.setAttribute("class", "unapproved");
+                        approveBtnEl.textContent = "Approve";
+                    }
+                } else {
+                    // display message something went wrong
+                    console.log("yikes");
+                }
+            }
         }
     } else {
         // display message to select a user before approving

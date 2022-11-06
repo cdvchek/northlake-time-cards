@@ -14,14 +14,13 @@ const signin = async (e) => {
         password,
         email,
     }
-    const res = await fetch("/api/signin", {
+    const res = await fetch("/api/users/signin", {
         method: "POST",
         body: JSON.stringify(signinObj),
         headers: {
             "Content-Type": "application/json"
         },
     });
-    console.log(res);
     if (res.ok) {
         location = "/user-timecard";
     } else {

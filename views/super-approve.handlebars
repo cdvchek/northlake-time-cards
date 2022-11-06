@@ -2,6 +2,7 @@
 <div id="background">
     {{> navbar}}
     <div id="options-div">
+        <span id="span-ready">---- ---- ----</span>
         <select name="week" id="week-choice">
             <option value="current">Current Period</option>
             <option value="previous">Last Period</option>
@@ -193,7 +194,7 @@
         <div id="empl-list">
             <ul>
                 {{#each supervisees}}
-                <li class="supervisee" data-id={{this.user_id}}>{{this.name}}</li>
+                <li class="supervisee" data-titleid={{this.title_id}} data-id={{this.user_id}}>{{this.titleName}}</li>
                 {{/each}}
             </ul>
         </div>

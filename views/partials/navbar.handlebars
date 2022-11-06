@@ -1,14 +1,6 @@
-{{!-- Current Time Card --}}
-{{!-- Previous Time Cards --}}
-{{!-- Supervisors: Approve Time Cards --}}
-{{!-- Admin: Manage Supervisors --}}
-{{!-- Admin: Manage Users --}}
-{{!-- Admin: Help --}}
-{{!-- Logout --}}
 <link rel="stylesheet" href="../css/navbar.css">
 <nav id="nav" issuper={{isSuper}} isadmin={{isAdmin}}>
     <button id="nav-time-card" class="nav left">Time Card</button>
-    <button id="nav-history" class="nav left">History</button>
     {{#if isSuper}}
     <button id="nav-super-approve" class="nav left">Approve</button>
     {{/if}}
@@ -20,6 +12,7 @@
     {{/if}}
     <button id="nav-admin-help" class="nav left">Help</button>
     <button id="nav-logout" class="nav left">Logout</button>
+    <button id="nav-username" class="nav right">{{userName}}</button id="nav-username">
 </nav>
 <div id="nav-offset"></div>
 <script src="../../js/navbar.js"></script>

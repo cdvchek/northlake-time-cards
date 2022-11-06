@@ -33,3 +33,7 @@ nav {
     position: absolute;
     right: 30px;
 }
+
+#nav-username {
+    cursor: default;
+}

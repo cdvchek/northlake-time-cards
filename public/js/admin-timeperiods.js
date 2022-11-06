@@ -6,7 +6,7 @@ const initializeTimePeriod = async () => {
         startDate: timePeriodInpt.value,
     }
 
-    const initializeResponse = await fetch("/api/init-timeperiods", {
+    const initializeResponse = await fetch("/api/timeperiods/init-timeperiods", {
         method: "POST",
         body: JSON.stringify(initializeObj),
         headers: {

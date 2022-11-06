@@ -10,7 +10,6 @@ if (navBar.getAttribute("isadmin") == "true") {
 }
 
 const timeCardBtn = document.getElementById("nav-time-card");
-const historyBtn = document.getElementById("nav-history");
 const approveBtn = document.getElementById("nav-super-approve");
 const manageSupersBtn = document.getElementById("nav-admin-supervisors");
 const manageUsersBtn = document.getElementById("nav-admin-users");
@@ -22,11 +21,6 @@ const logoutBtn = document.getElementById("nav-logout");
 const goToTimeCard = (e) => {
     e.preventDefault();
     location = "/user-timecard/";
-}
-
-const goToHistory = (e) => {
-    e.preventDefault();
-    location = "/user-history/";
 }
 
 const goToApprove = (e) => {
@@ -61,14 +55,13 @@ const goToHelp = (e) => {
 
 const goToLogout = async (e) => {
     e.preventDefault();
-    const logout = await fetch("/api/logout");
+    const logout = await fetch("/api/users/logout");
     if (logout.ok) {
         location = "/";
     }
 }
 
 timeCardBtn.addEventListener("click", goToTimeCard);
-historyBtn.addEventListener("click", goToHistory);
 if (isSuper) {
     approveBtn.addEventListener("click", goToApprove);
 }

@@ -15,7 +15,7 @@ const addSupervisee = async (e) => {
         titleId,
     }
 
-    const updateSuperviseesResponse = await fetch("/api/edit-supervisees/" + selectedSupervisorId, {
+    const updateSuperviseesResponse = await fetch("/api/users/edit-supervisees/" + selectedSupervisorId, {
         method: 'PUT',
         body: JSON.stringify(updateSuperviseesObj),
         headers: {
@@ -50,7 +50,7 @@ const removeSupervisee = async (e) => {
         titleId,
     }
 
-    const updateSuperviseesResponse = await fetch("/api/edit-supervisees/" + selectedSupervisorId, {
+    const updateSuperviseesResponse = await fetch("/api/users/edit-supervisees/" + selectedSupervisorId, {
         method: 'PUT',
         body: JSON.stringify(updateSuperviseesObj),
         headers: {
@@ -89,8 +89,8 @@ const manageUsers = async (e) => {
 
     const userId = e.target.getAttribute("data-id");
     selectedSupervisorId = userId;
-    const users = await (await fetch("/api/users-titles/")).json();
-    const supervisees = (await (await fetch("/api/supervisees/" + userId)).json()).supervisees;
+    const users = await (await fetch("/api/users/users-titles/")).json();
+    const supervisees = (await (await fetch("/api/users/supervisees/" + userId)).json()).supervisees;
     const superviseesArray = supervisees.split(",");
 
     const readSupervisees = [];
@@ -164,7 +164,7 @@ const addSuper = async (e) => {
             isSuper: true,
         }
     }
-    const setSuperResponse = await fetch("/api/user-id/" + userId, {
+    const setSuperResponse = await fetch("/api/users/user-id/" + userId, {
         method: 'PUT',
         body: JSON.stringify(updateUserObj),
         headers: {
@@ -200,7 +200,7 @@ const removeSuper = async (e) => {
             isSuper: false,
         }
     }
-    const removeSuperResponse = await fetch("/api/user-id/" + userId, {
+    const removeSuperResponse = await fetch("/api/users/user-id/" + userId, {
         method: 'PUT',
         body: JSON.stringify(updateUserObj),
         headers: {

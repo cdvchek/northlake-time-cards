@@ -10,7 +10,7 @@ const signupNewAdmin = async (e) => {
     e.preventDefault();
 
     const titleEls = document.getElementsByClassName("inpt-title");
-    let titles = [];
+    const titles = [];
 
     for (let i = 0; i < titleEls.length; i++) {
         const titleInpt = titleEls[i];
@@ -39,7 +39,7 @@ const signupNewAdmin = async (e) => {
                                 titles,
                             }
 
-                            const signupResponse = await fetch("/api/admin-signup", {
+                            const signupResponse = await fetch("/api/users/admin-signup", {
                                 method: "POST",
                                 body: JSON.stringify(signupObj),
                                 headers: {
@@ -53,7 +53,7 @@ const signupNewAdmin = async (e) => {
                                     password: password,
                                 }
 
-                                const signinResponse = await fetch("/api/signin", {
+                                const signinResponse = await fetch("/api/users/signin", {
                                     method: "POST",
                                     body: JSON.stringify(signinObj),
                                     headers: {

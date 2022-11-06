@@ -30,7 +30,7 @@ const setupModalTimecards = async (userId) => {
     for (let i = 0; i < modalContentChildrenLength; i++) {
         modalContentChildren[0].remove();
     }
-    const user = await (await fetch('/api/user-id/' + userId)).json();
+    const user = await (await fetch('/api/users/user-id/' + userId)).json();
     const timecards = user.TimeCards;
 
     const tabsDiv = document.createElement("div");
@@ -60,7 +60,7 @@ const setupModalTimecards = async (userId) => {
         const week = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
         const timeCardTable1 = document.createElement("table");
         const timeCardTable2 = document.createElement("table");
-        const timeCardData = await (await fetch("/api/timecard/" + timecard.timecard_id.toString())).json();
+        const timeCardData = await (await fetch("/api/timecards/" + timecard.timecard_id.toString())).json();
         for (let l = 0; l < 2; l++) { // 2 weeks
             let timeCells = [];
             // Creating the Headers Row

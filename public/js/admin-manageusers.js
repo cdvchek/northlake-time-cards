@@ -25,7 +25,7 @@ let oldTitle = [];
 const populateProfile = async (e) => {
     const userId = e.target.getAttribute('data-id');
     viewTimeCardBtn.setAttribute("data-id", userId);
-    const user = await (await fetch('/api/user-id/' + userId)).json();
+    const user = await (await fetch('/api/users/user-id/' + userId)).json();
     const titleChildren = titlesUl.children;
     const titleChildrenLength = titleChildren.length
     for (let i = 0; i < titleChildrenLength; i++) {
@@ -101,7 +101,7 @@ const changePassword = async () => {
                     user_id: userId,
                     updateUser: updateUser,
                 }
-                const changePasswordResponse = await fetch("/api/user-id/" + userId, {
+                const changePasswordResponse = await fetch("/api/users/user-id/" + userId, {
                     method: 'PUT',
                     body: JSON.stringify(updateUserObj),
                     headers: {
@@ -150,7 +150,7 @@ const changeEmail = async () => {
                     user_id: userId,
                     updateUser: updateUser,
                 }
-                const changeEmailResponse = await fetch("/api/user-id/" + userId, {
+                const changeEmailResponse = await fetch("/api/users/user-id/" + userId, {
                     method: 'PUT',
                     body: JSON.stringify(updateUserObj),
                     headers: {
@@ -199,7 +199,7 @@ const changeName = async () => {
                     user_id: userId,
                     updateUser: updateUser,
                 }
-                const changeNameResponse = await fetch("/api/user-id/" + userId, {
+                const changeNameResponse = await fetch("/api/users/user-id/" + userId, {
                     method: 'PUT',
                     body: JSON.stringify(updateUserObj),
                     headers: {
@@ -238,14 +238,14 @@ const deleteUser = async () => {
     const userId = userDiv.getAttribute("data-id");
     if (userId !== null) {
         if (window.confirm("Are you sure you want to delete this User?\nIf you are logged in as this user, you will be logged out upon deletion.")) {
-            const deleteUserResponse = await (await fetch("/api/user-id/" + userId, {
+            const deleteUserResponse = await (await fetch("/api/users/user-id/" + userId, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": "application/json"
                 }
             })).json();
             if (deleteUserResponse.hasDeletedSelf) {
-                const logoutResponse = await fetch("/api/logout");
+                const logoutResponse = await fetch("/api/users/logout");
                 if (logoutResponse.ok) {
                     location = "/"
                 }
@@ -309,7 +309,7 @@ const removeTitleBtns = document.getElementsByClassName("remove-title-btn");
 const removeTitle = async (e) => {
     // Hit a route to remove the title from the database
     const titleId = e.target.getAttribute("data-titleid");
-    const removeResponse = await fetch("/api/title/" + titleId, {
+    const removeResponse = await fetch("/api/titles/title/" + titleId, {
         method: 'DELETE',
         headers: {
             "Content-Type": "application/json"
@@ -342,7 +342,7 @@ const saveTitle = async (e) => {
         }
     }
     const titleId = e.target.getAttribute("data-titleid");
-    const saveTitleResponse = await fetch("/api/title/" + titleId, {
+    const saveTitleResponse = await fetch("/api/titles/title/" + titleId, {
         method: 'PUT',
         body: JSON.stringify(updateTitleObj),
         headers: {
@@ -379,7 +379,7 @@ const addTitle = async () => {
         titleName,
         userId,
     }
-    const addTitleResponse = await fetch("/api/title/", {
+    const addTitleResponse = await fetch("/api/titles/title/", {
         method: 'POST',
         body: JSON.stringify(titleObj),
         headers: {

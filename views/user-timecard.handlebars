@@ -2,162 +2,289 @@
 <div id="background">
     {{> navbar}}
     {{#if hasTimeCard}}
-    <div id="timecard" data-timecard="true">
-        <table>
-            <tr>
-                <th>Week 1</th>
-                <th>Sunday</th>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-                <th>Saturday</th>
-                <th>Weekly Total</th>
-            </tr>
-            {{#each timeInOuts1}}
-            <tr class="tr-in">
-                <td>Time In</td>
-                <td>
-                    <input id={{sundayNameIn}} class="edit-time-1" type="time" value={{this.sunday_in}}>
-                </td>
-                <td>
-                    <input id={{mondayNameIn}} class="edit-time-1" type="time" value={{this.monday_in}}>
-                </td>
-                <td>
-                    <input id={{tuesdayNameIn}} class="edit-time-1" type="time" value={{this.tuesday_in}}>
-                </td>
-                <td>
-                    <input id={{wednesdayNameIn}} class="edit-time-1" type="time" value={{this.wednesday_in}}>
-                </td>
-                <td>
-                    <input id={{thursdayNameIn}} class="edit-time-1" type="time" value={{this.thursday_in}}>
-                </td>
-                <td>
-                    <input id={{fridayNameIn}} class="edit-time-1" type="time" value={{this.friday_in}}>
-                </td>
-                <td>
-                    <input id={{saturdayNameIn}} class="edit-time-1" type="time" value={{this.saturday_in}}>
-                </td>
-                <td></td>
-            </tr>
-            <tr class="tr-out">
-                <td>Time Out</td>
-                <td>
-                    <input id={{sundayNameOut}} class="edit-time-1" type="time" value={{this.sunday_out}}>
-                </td>
-                <td>
-                    <input id={{mondayNameOut}} class="edit-time-1" type="time" value={{this.monday_out}}>
-                </td>
-                <td>
-                    <input id={{tuesdayNameOut}} class="edit-time-1" type="time" value={{this.tuesday_out}}>
-                </td>
-                <td>
-                    <input id={{wednesdayNameOut}} class="edit-time-1" type="time" value={{this.wednesday_out}}>
-                </td>
-                <td>
-                    <input id={{thursdayNameOut}} class="edit-time-1" type="time" value={{this.thursday_out}}>
-                </td>
-                <td>
-                    <input id={{fridayNameOut}} class="edit-time-1" type="time" value={{this.friday_out}}>
-                </td>
-                <td>
-                    <input id={{saturdayNameOut}} class="edit-time-1" type="time" value={{this.saturday_out}}>
-                </td>
-                <td></td>
-            </tr>
+    {{#if isFirstTimeCardReady}}
+    <button id="ready-btn" class="hide ready-btn">Ready</button>
+    <button id="unready-btn" class="show ready-btn">Unready</button>
+    <button id="open-options-btn">=</button>
+    {{else}}
+    <button id="ready-btn" class="show ready-btn">Ready</button>
+    <button id="unready-btn" class="hide ready-btn">Unready</button>
+    <button id="open-options-btn">=</button>
+    {{/if}}
+    <div id="timecards-div" data-timecard="true">
+        {{#each timecards}}
+        {{#if this.isApproved}}
+        <div id={{this.timecard_id}} data-isready={{this.isReadyToBeApproved}} data-title={{this.title}}
+            data-timecardid={{this.timecard_id}} data-period={{this.period}} {{#if this.isFirst}}
+            class="shown-timecard timecard" {{else}} class="hidden-timecard timecard" {{/if}}>
+            <h3 class="timecard-identifier-h3">{{this.startdate}} - {{this.enddate}} {{this.titlename}}</h3>
+            <table id="table-{{this.timecard_id}}-1">
+                <tr>
+                    <th>Week 1</th>
+                    <th>Sunday<br>{{this.startdate}}</th>
+                    <th>Monday<br>{{this.day1}}</th>
+                    <th>Tuesday<br>{{this.day2}}</th>
+                    <th>Wednesday<br>{{this.day3}}</th>
+                    <th>Thursday<br>{{this.day4}}</th>
+                    <th>Friday<br>{{this.day5}}</th>
+                    <th>Saturday<br>{{this.day6}}</th>
+                    <th>Weekly Total</th>
+                </tr>
+                {{#each this.timeInOuts1}}
+                <tr class="tr-in">
+                    <td>Time In</td>
+                    {{#each this.times_in}}
+                    <td>
+                        {{this.value}}
+                    </td>
+                    {{/each}}
+                    <td></td>
+                </tr>
+                <tr class="tr-out">
+                    <td>Time Out</td>
+                    {{#each this.times_out}}
+                    <td>
+                        {{this.value}}
+                    </td>
+                    {{/each}}
+                    <td></td>
+                </tr>
+                {{/each}}
+                <tr>
+                    <td>Daily Total</td>
+                    <td id="0-total-{{this.timecard_id}}"></td>
+                    <td id="1-total-{{this.timecard_id}}"></td>
+                    <td id="2-total-{{this.timecard_id}}"></td>
+                    <td id="3-total-{{this.timecard_id}}"></td>
+                    <td id="4-total-{{this.timecard_id}}"></td>
+                    <td id="5-total-{{this.timecard_id}}"></td>
+                    <td id="6-total-{{this.timecard_id}}"></td>
+                    <td id="weekly-total-{{this.timecard_id}}"></td>
+                </tr>
+            </table>
+            <table id="table-{{this.timecard_id}}-1">
+                <tr>
+                    <th>Week 2</th>
+                    <th>Sunday<br>{{this.day7}}</th>
+                    <th>Monday<br>{{this.day8}}</th>
+                    <th>Tuesday<br>{{this.day9}}</th>
+                    <th>Wednesday<br>{{this.day10}}</th>
+                    <th>Thursday<br>{{this.day11}}</th>
+                    <th>Friday<br>{{this.day12}}</th>
+                    <th>Saturday<br>{{this.day13}}</th>
+                    <th>Weekly Total</th>
+                </tr>
+                {{#each this.timeInOuts2}}
+                <tr class="tr-in">
+                    <td>Time In</td>
+                    {{#each this.times_in}}
+                    <td>
+                        {{this.value}}
+                    </td>
+                    {{/each}}
+                    <td></td>
+                </tr>
+                <tr class="tr-out">
+                    <td>Time Out</td>
+                    {{#each this.times_out}}
+                    <td>
+                        {{this.value}}
+                    </td>
+                    {{/each}}
+                    <td></td>
+                </tr>
+                {{/each}}
+                <tr>
+                    <td>Daily Total</td>
+                    <td id="0-total-2-{{this.timecard_id}}"></td>
+                    <td id="1-total-2-{{this.timecard_id}}"></td>
+                    <td id="2-total-2-{{this.timecard_id}}"></td>
+                    <td id="3-total-2-{{this.timecard_id}}"></td>
+                    <td id="4-total-2-{{this.timecard_id}}"></td>
+                    <td id="5-total-2-{{this.timecard_id}}"></td>
+                    <td id="6-total-2-{{this.timecard_id}}"></td>
+                    <td id="weekly-total-2-{{this.timecard_id}}"></td>
+                </tr>
+            </table>
+        </div>
+        {{else}}
+        <div id={{this.timecard_id}} data-isready={{this.isReadyToBeApproved}} data-title={{this.title}}
+            data-timecardid={{this.timecard_id}} data-period={{this.period}} {{#if this.isFirst}}
+            class="shown-timecard timecard" {{else}} class="hidden-timecard timecard" {{/if}}>
+            <h3 class="timecard-identifier-h3">{{this.startdate}} - {{this.enddate}} {{this.titlename}}</h3>
+            <table id="table-{{this.timecard_id}}-1">
+                <tr>
+                    <th>Week 1</th>
+                    <th>Sunday</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                    <th>Weekly Total</th>
+                </tr>
+                {{#each this.timeInOuts1}}
+                <tr class="tr-in">
+                    <td>Time In</td>
+                    {{#each this.times_in}}
+                    <td>
+                        <input id={{this.name}} class={{this.cellsClass}} type="time" value={{this.value}}>
+                    </td>
+                    {{/each}}
+                    <td></td>
+                </tr>
+                <tr class="tr-out">
+                    <td>Time Out</td>
+                    {{#each this.times_out}}
+                    <td>
+                        <input id={{this.name}} class={{this.cellsClass}} type="time" value={{this.value}}>
+                    </td>
+                    {{/each}}
+                    <td></td>
+                </tr>
+                {{/each}}
+                <tr>
+                    <td>Daily Total</td>
+                    <td id="0-total-{{this.timecard_id}}"></td>
+                    <td id="1-total-{{this.timecard_id}}"></td>
+                    <td id="2-total-{{this.timecard_id}}"></td>
+                    <td id="3-total-{{this.timecard_id}}"></td>
+                    <td id="4-total-{{this.timecard_id}}"></td>
+                    <td id="5-total-{{this.timecard_id}}"></td>
+                    <td id="6-total-{{this.timecard_id}}"></td>
+                    <td id="weekly-total-{{this.timecard_id}}"></td>
+                </tr>
+            </table>
+            <div class="add-time-in-out-div">
+                <button class="add-time-in-out-btn" data-timecardid={{this.timecard_id}} data-week="1">Add Time
+                    In/Out</button>
+            </div>
+            <table id="table-{{this.timecard_id}}-1">
+                <tr>
+                    <th>Week 2</th>
+                    <th>Sunday</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                    <th>Saturday</th>
+                    <th>Weekly Total</th>
+                </tr>
+                {{#each this.timeInOuts2}}
+                <tr class="tr-in">
+                    <td>Time In</td>
+                    {{#each this.times_in}}
+                    <td>
+                        <input id={{this.name}} class={{this.cellsClass}} type="time" value={{this.value}}>
+                    </td>
+                    {{/each}}
+                    <td></td>
+                </tr>
+                <tr class="tr-out">
+                    <td>Time Out</td>
+                    {{#each this.times_out}}
+                    <td>
+                        <input id={{this.name}} class={{this.cellsClass}} type="time" value={{this.value}}>
+                    </td>
+                    {{/each}}
+                    <td></td>
+                </tr>
+                {{/each}}
+                <tr>
+                    <td>Daily Total</td>
+                    <td id="0-total-2-{{this.timecard_id}}"></td>
+                    <td id="1-total-2-{{this.timecard_id}}"></td>
+                    <td id="2-total-2-{{this.timecard_id}}"></td>
+                    <td id="3-total-2-{{this.timecard_id}}"></td>
+                    <td id="4-total-2-{{this.timecard_id}}"></td>
+                    <td id="5-total-2-{{this.timecard_id}}"></td>
+                    <td id="6-total-2-{{this.timecard_id}}"></td>
+                    <td id="weekly-total-2-{{this.timecard_id}}"></td>
+                </tr>
+            </table>
+            <div class="add-time-in-out-div">
+                <button class="add-time-in-out-btn" data-timecardid={{this.timecard_id}} data-week="2">Add Time
+                    In/Out</button>
+            </div>
+        </div>
+        {{/if}}
+        {{/each}}
+    </div>
+    <div id="time-card-modal-options-div">
+        <button id="close-options-btn">X</button>
+        <div id="time-card-list-div">
+            {{#each timecards}}
+            <div data-id="mini-{{this.timecard_id}}" class="time-card-selector">
+                <span class="time-card-identifier">{{this.startdate}} - {{this.enddate}}</span>
+                <span class="time-card-identifier">{{this.titlename}}</span> <br>
+                <table class="mini-table week-1">
+                    <tr class="mini-table-tr">
+                        <th class="mini-table-cell">Week 1</th>
+                        <th class="mini-table-cell">Sunday</th>
+                        <th class="mini-table-cell">Monday</th>
+                        <th class="mini-table-cell">Tuesday</th>
+                        <th class="mini-table-cell">Wednesday</th>
+                        <th class="mini-table-cell">Thursday</th>
+                        <th class="mini-table-cell">Friday</th>
+                        <th class="mini-table-cell">Saturday</th>
+                    </tr>
+                    {{#each this.timeInOuts1}}
+                    <tr class="mini-table-tr">
+                        <td class="mini-table-cell">Time In</td>
+                        {{#each this.times_in}}
+                        <td class="mini-table-cell">
+                            {{this.value}}
+                        </td>
+                        {{/each}}
+                    </tr>
+                    <tr class="mini-table-tr">
+                        <td class="mini-table-cell">Time Out</td>
+                        {{#each this.times_out}}
+                        <td class="mini-table-cell">
+                            {{this.value}}
+                        </td>
+                        {{/each}}
+                    </tr>
+                    {{/each}}
+                </table>
+                <table class="mini-table week-2">
+                    <tr class="mini-table-tr">
+                        <th class="mini-table-cell">Week 2</th>
+                        <th class="mini-table-cell">Sunday</th>
+                        <th class="mini-table-cell">Monday</th>
+                        <th class="mini-table-cell">Tuesday</th>
+                        <th class="mini-table-cell">Wednesday</th>
+                        <th class="mini-table-cell">Thursday</th>
+                        <th class="mini-table-cell">Friday</th>
+                        <th class="mini-table-cell">Saturday</th>
+                    </tr>
+                    {{#each this.timeInOuts2}}
+                    <tr class="mini-table-tr">
+                        <td class="mini-table-cell">Time In</td>
+                        {{#each this.times_in}}
+                        <td class="mini-table-cell">
+                            {{this.value}}
+                        </td>
+                        {{/each}}
+                    </tr>
+                    <tr class="mini-table-tr">
+                        <td class="mini-table-cell">Time Out</td>
+                        {{#each this.times_out}}
+                        <td class="mini-table-cell">
+                            {{this.value}}
+                        </td>
+                        {{/each}}
+                    </tr>
+                    {{/each}}
+                </table>
+            </div>
             {{/each}}
-            <tr>
-                <td>Daily Total</td>
-                <td id="0-total"></td>
-                <td id="1-total"></td>
-                <td id="2-total"></td>
-                <td id="3-total"></td>
-                <td id="4-total"></td>
-                <td id="5-total"></td>
-                <td id="6-total"></td>
-                <td id="weekly-total"></td>
-            </tr>
-        </table>
-        <table>
-            <tr>
-                <th>Week 2</th>
-                <th>Sunday</th>
-                <th>Monday</th>
-                <th>Tuesday</th>
-                <th>Wednesday</th>
-                <th>Thursday</th>
-                <th>Friday</th>
-                <th>Saturday</th>
-                <th>Weekly Total</th>
-            </tr>
-            {{#each timeInOuts2}}
-            <tr class="tr-in">
-                <td>Time In</td>
-                <td>
-                    <input id={{sundayNameIn}} class="edit-time-2" type="time" value={{this.sunday_in}}>
-                </td>
-                <td>
-                    <input id={{mondayNameIn}} class="edit-time-2" type="time" value={{this.monday_in}}>
-                </td>
-                <td>
-                    <input id={{tuesdayNameIn}} class="edit-time-2" type="time" value={{this.tuesday_in}}>
-                </td>
-                <td>
-                    <input id={{wednesdayNameIn}} class="edit-time-2" type="time" value={{this.wednesday_in}}>
-                </td>
-                <td>
-                    <input id={{thursdayNameIn}} class="edit-time-2" type="time" value={{this.thursday_in}}>
-                </td>
-                <td>
-                    <input id={{fridayNameIn}} class="edit-time-2" type="time" value={{this.friday_in}}>
-                </td>
-                <td>
-                    <input id={{saturdayNameIn}} class="edit-time-2" type="time" value={{this.saturday_in}}>
-                </td>
-                <td></td>
-            </tr>
-            <tr class="tr-out">
-                <td>Time Out</td>
-                <td>
-                    <input id={{sundayNameOut}} class="edit-time-2" type="time" value={{this.sunday_out}}>
-                </td>
-                <td>
-                    <input id={{mondayNameOut}} class="edit-time-2" type="time" value={{this.monday_out}}>
-                </td>
-                <td>
-                    <input id={{tuesdayNameOut}} class="edit-time-2" type="time" value={{this.tuesday_out}}>
-                </td>
-                <td>
-                    <input id={{wednesdayNameOut}} class="edit-time-2" type="time" value={{this.wednesday_out}}>
-                </td>
-                <td>
-                    <input id={{thursdayNameOut}} class="edit-time-2" type="time" value={{this.thursday_out}}>
-                </td>
-                <td>
-                    <input id={{fridayNameOut}} class="edit-time-2" type="time" value={{this.friday_out}}>
-                </td>
-                <td>
-                    <input id={{saturdayNameOut}} class="edit-time-2" type="time" value={{this.saturday_out}}>
-                </td>
-                <td></td>
-            </tr>
-            {{/each}}
-            <tr>
-                <td>Daily Total</td>
-                <td id="0-total-2"></td>
-                <td id="1-total-2"></td>
-                <td id="2-total-2"></td>
-                <td id="3-total-2"></td>
-                <td id="4-total-2"></td>
-                <td id="5-total-2"></td>
-                <td id="6-total-2"></td>
-                <td id="weekly-total-2"></td>
-            </tr>
-        </table>
+        </div>
     </div>
     {{else}}
-    <p id="timecard" data-timecard="false">You don't have any time cards.</p>
+    <p id="timecards-div" data-timecard="false">You don't have any time cards.</p>
     {{/if}}
 </div>
 <script src="../js/process-timecard.js"></script>
