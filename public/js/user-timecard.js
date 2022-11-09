@@ -1,80 +1,96 @@
 const timecardEls = document.getElementsByClassName("timecard");
 const timecardsDiv = document.getElementById("timecards-div");
 const hasTimeCard = timecardsDiv.getAttribute("data-timecard");
+const weekDays = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
 if (hasTimeCard === "true") {
-    const newUpdate = (e) => {
-        const timecardId = e.target.getAttribute("class").split("-")[3];
-        const newTimeCells1 = document.getElementsByClassName("edit-time-1-" + timecardId);
-        const newTimeCells2 = document.getElementsByClassName("edit-time-2-" + timecardId);
-        const weeklyTotal = document.getElementById("weekly-total-" + timecardId);
-        const sundayTotal = document.getElementById("0-total-" + timecardId);
-        const mondayTotal = document.getElementById("1-total-" + timecardId);
-        const tuesdayTotal = document.getElementById("2-total-" + timecardId);
-        const wednesdayTotal = document.getElementById("3-total-" + timecardId);
-        const thursdayTotal = document.getElementById("4-total-" + timecardId);
-        const fridayTotal = document.getElementById("5-total-" + timecardId);
-        const saturdayTotal = document.getElementById("6-total-" + timecardId);
-        const weeklyTotal2 = document.getElementById("weekly-total-2-" + timecardId);
-        const sundayTotal2 = document.getElementById("0-total-2-" + timecardId);
-        const mondayTotal2 = document.getElementById("1-total-2-" + timecardId);
-        const tuesdayTotal2 = document.getElementById("2-total-2-" + timecardId);
-        const wednesdayTotal2 = document.getElementById("3-total-2-" + timecardId);
-        const thursdayTotal2 = document.getElementById("4-total-2-" + timecardId);
-        const fridayTotal2 = document.getElementById("5-total-2-" + timecardId);
-        const saturdayTotal2 = document.getElementById("6-total-2-" + timecardId);
-
-        const update = async () => {
-            getValues1(e);
-            getValues2(e);
-
-            const target = e.target.id.split("_");
-            const order = target[0];
-            const day = target[1];
-            const inout = target[2];
-            const week = target[3];
-            const value = e.target.value;
-            const updateObj = {
-                order,
-                key: `${day}_${inout}`,
-                week,
-                timecardId,
-                value
+    const grabTotals = (timecardId) => {
+        return {
+            weekOne: {
+                total: document.getElementById("weekly-total-" + timecardId),
+                sunday: document.getElementById("0-total-" + timecardId),
+                monday: document.getElementById("1-total-" + timecardId),
+                tuesday: document.getElementById("2-total-" + timecardId),
+                wednesday: document.getElementById("3-total-" + timecardId),
+                thursday: document.getElementById("4-total-" + timecardId),
+                friday: document.getElementById("5-total-" + timecardId),
+                saturday: document.getElementById("6-total-" + timecardId),
+            },
+            weekTwo: {
+                total: document.getElementById("weekly-total-2-" + timecardId),
+                sunday: document.getElementById("0-total-2-" + timecardId),
+                monday: document.getElementById("1-total-2-" + timecardId),
+                tuesday: document.getElementById("2-total-2-" + timecardId),
+                wednesday: document.getElementById("3-total-2-" + timecardId),
+                thursday: document.getElementById("4-total-2-" + timecardId),
+                friday: document.getElementById("5-total-2-" + timecardId),
+                saturday: document.getElementById("6-total-2-" + timecardId),
             }
+        }
+    }
 
-            const updateResponse = await fetch("/api/timecards/timecard", {
-                method: "PUT",
-                body: JSON.stringify(updateObj),
-                headers: {
-                    "Content-Type": "application/json"
-                },
-            });
+    const grabTimeCells = (timecardId) => {
+        return {
+            weekOne: document.getElementsByClassName("edit-time-1-" + timecardId),
+            weekTwo: document.getElementsByClassName("edit-time-2-" + timecardId),
+        }
+    }
+
+    const updateTotals = (timeCellEls, totalsEls, type) => { // type can be "input" or "cell"
+        const weekOneTotals = processTimeCard(timeCellEls.weekOne, type);
+
+        totalsEls.weekOne.total.textContent = weekOneTotals.weeklyTotal;
+        for (let i = 0; i < weekDays.length; i++) {
+            const weekDay = weekDays[i];
+            totalsEls.weekOne[weekDay].textContent = weekOneTotals.dailyTotals[i];
         }
 
-        const getValues1 = () => {
-            const details = processTimeCard(newTimeCells1, "input");
-            weeklyTotal.textContent = details.weeklyTotal;
-            sundayTotal.textContent = details.dailyTotals[0];
-            mondayTotal.textContent = details.dailyTotals[1];
-            tuesdayTotal.textContent = details.dailyTotals[2];
-            wednesdayTotal.textContent = details.dailyTotals[3];
-            thursdayTotal.textContent = details.dailyTotals[4];
-            fridayTotal.textContent = details.dailyTotals[5];
-            saturdayTotal.textContent = details.dailyTotals[6];
+        const weekTwoTotals = processTimeCard(timeCellEls.weekTwo, type);
+
+        totalsEls.weekTwo.total.textContent = weekTwoTotals.weeklyTotal;
+        for (let i = 0; i < weekDays.length; i++) {
+            const weekDay = weekDays[i];
+            totalsEls.weekTwo[weekDay].textContent = weekTwoTotals.dailyTotals[i];
         }
-        const getValues2 = () => {
-            const details = processTimeCard(newTimeCells2, "input");
-            weeklyTotal2.textContent = details.weeklyTotal;
-            sundayTotal2.textContent = details.dailyTotals[0];
-            mondayTotal2.textContent = details.dailyTotals[1];
-            tuesdayTotal2.textContent = details.dailyTotals[2];
-            wednesdayTotal2.textContent = details.dailyTotals[3];
-            thursdayTotal2.textContent = details.dailyTotals[4];
-            fridayTotal2.textContent = details.dailyTotals[5];
-            saturdayTotal2.textContent = details.dailyTotals[6];
+    }
+
+    const updateTimeCell = async (e, timecardId) => {
+        const target = e.target.id.split("_");
+        const order = target[0];
+        const day = target[1];
+        const inout = target[2];
+        const week = target[3];
+        const value = e.target.value;
+        const updateObj = {
+            order,
+            key: `${day}_${inout}`,
+            week,
+            timecardId,
+            value
         }
 
-        update();
+        const updateResponse = await fetch("/api/timecards/timecard", {
+            method: "PUT",
+            body: JSON.stringify(updateObj),
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+
+        return updateResponse;
+    }
+
+    const newUpdate = async (e) => {
+        const timecardId = e.target.getAttribute("class").split("-")[3];
+        const response = await updateTimeCell(e, timecardId);
+
+        if (response.ok) {
+            const timeCellEls = grabTimeCells(timecardId);
+            const totalsEls = grabTotals(timecardId);
+            updateTotals(timeCellEls, totalsEls, "input");
+        } else {
+            displayMessage("Something went wrong, please refresh and try again.")
+        }
     }
 
     const setupTimeCard = (timecardId) => {
@@ -354,6 +370,9 @@ if (hasTimeCard === "true") {
             const timeOutRemove = tbody.children[tbody.children.length - 2];
             timeInRemove.remove();
             timeOutRemove.remove();
+            const timeCellEls = grabTimeCells(timecardId);
+            const totalsEls = grabTotals(timecardId);
+            updateTotals(timeCellEls, totalsEls, "input");
         } else {
             displayMessage("Something went wrong, please refresh and try again.");
         }

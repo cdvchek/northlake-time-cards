@@ -67,3 +67,7 @@ li {
     border-color: rgb(152, 152, 152);
     color: rgb(152, 152, 152);
 }
+
+.selectedSupervisor {
+    border: blue solid 5px;
+}

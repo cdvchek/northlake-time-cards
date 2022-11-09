@@ -75,6 +75,16 @@ const removeSupervisee = async (e) => {
 }
 
 const manageUsers = async (e) => {
+    const ulChildren = e.target.parentNode.parentNode.children;
+    for (let i = 0; i < ulChildren.length; i++) {
+        const supervisor = ulChildren[i];
+        const supervisorClass = supervisor.getAttribute("class");
+        const newClass = supervisorClass.replace(" selectedSupervisor", "");
+        supervisor.setAttribute("class", newClass);
+    }
+    const targetClass = e.target.parentNode.getAttribute("class");
+    e.target.parentNode.setAttribute("class", targetClass + " selectedSupervisor");
+
     const superviseesUlChildren = superviseesUl.children;
     const notSuperviseesUlChildren = notSuperviseesUl.children;
     const superviseesChildrenLength = superviseesUlChildren.length

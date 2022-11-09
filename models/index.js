@@ -3,6 +3,7 @@ const TimeCard = require("./TimeCard.js");
 const TimeInOut = require("./TimeInOut.js");
 const TimePeriod = require("./TimePeriod.js");
 const Title = require("./Title.js");
+const OffDay = require("./OffDay.js");
 
 User.hasMany(TimeCard, {
     foreignKey: 'user_id',
@@ -38,6 +39,11 @@ Title.hasMany(TimeCard, {
 });
 TimeCard.belongsTo(Title, { foreignKey: 'title_id' });
 
+TimeCard.hasMany(OffDay, {
+    foreignKey: 'timecard_id',
+    onDelete: 'CASCADE',
+});
+OffDay.belongsTo(TimeCard, { foreignKey: 'timecard_id' });
 
 module.exports = {
     User,
@@ -45,4 +51,5 @@ module.exports = {
     TimeInOut,
     TimePeriod,
     Title,
+    OffDay,
 }
