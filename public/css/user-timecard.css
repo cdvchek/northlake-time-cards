@@ -38,12 +38,17 @@ td {
     height: 40px;
 }
 
+.week-day {
+    min-width: 123px;
+}
+
 td {
     text-align: center;
 }
 
 input {
     padding-left: 20%;
+    min-width: 100px;
     border: none;
     position: relative;
     right: 1px;

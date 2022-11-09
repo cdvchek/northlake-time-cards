@@ -1,10 +1,83 @@
 const timecardEls = document.getElementsByClassName("timecard");
 const timecardsDiv = document.getElementById("timecards-div");
 const hasTimeCard = timecardsDiv.getAttribute("data-timecard");
+
 if (hasTimeCard === "true") {
-    for (let i = 0; i < timecardEls.length; i++) {
-        const timecardEl = timecardEls[i];
-        const timecardId = timecardEl.getAttribute("data-timecardid");
+    const newUpdate = (e) => {
+        const timecardId = e.target.getAttribute("class").split("-")[3];
+        const newTimeCells1 = document.getElementsByClassName("edit-time-1-" + timecardId);
+        const newTimeCells2 = document.getElementsByClassName("edit-time-2-" + timecardId);
+        const weeklyTotal = document.getElementById("weekly-total-" + timecardId);
+        const sundayTotal = document.getElementById("0-total-" + timecardId);
+        const mondayTotal = document.getElementById("1-total-" + timecardId);
+        const tuesdayTotal = document.getElementById("2-total-" + timecardId);
+        const wednesdayTotal = document.getElementById("3-total-" + timecardId);
+        const thursdayTotal = document.getElementById("4-total-" + timecardId);
+        const fridayTotal = document.getElementById("5-total-" + timecardId);
+        const saturdayTotal = document.getElementById("6-total-" + timecardId);
+        const weeklyTotal2 = document.getElementById("weekly-total-2-" + timecardId);
+        const sundayTotal2 = document.getElementById("0-total-2-" + timecardId);
+        const mondayTotal2 = document.getElementById("1-total-2-" + timecardId);
+        const tuesdayTotal2 = document.getElementById("2-total-2-" + timecardId);
+        const wednesdayTotal2 = document.getElementById("3-total-2-" + timecardId);
+        const thursdayTotal2 = document.getElementById("4-total-2-" + timecardId);
+        const fridayTotal2 = document.getElementById("5-total-2-" + timecardId);
+        const saturdayTotal2 = document.getElementById("6-total-2-" + timecardId);
+
+        const update = async () => {
+            getValues1(e);
+            getValues2(e);
+
+            const target = e.target.id.split("_");
+            const order = target[0];
+            const day = target[1];
+            const inout = target[2];
+            const week = target[3];
+            const value = e.target.value;
+            const updateObj = {
+                order,
+                key: `${day}_${inout}`,
+                week,
+                timecardId,
+                value
+            }
+
+            const updateResponse = await fetch("/api/timecards/timecard", {
+                method: "PUT",
+                body: JSON.stringify(updateObj),
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            });
+        }
+
+        const getValues1 = () => {
+            const details = processTimeCard(newTimeCells1, "input");
+            weeklyTotal.textContent = details.weeklyTotal;
+            sundayTotal.textContent = details.dailyTotals[0];
+            mondayTotal.textContent = details.dailyTotals[1];
+            tuesdayTotal.textContent = details.dailyTotals[2];
+            wednesdayTotal.textContent = details.dailyTotals[3];
+            thursdayTotal.textContent = details.dailyTotals[4];
+            fridayTotal.textContent = details.dailyTotals[5];
+            saturdayTotal.textContent = details.dailyTotals[6];
+        }
+        const getValues2 = () => {
+            const details = processTimeCard(newTimeCells2, "input");
+            weeklyTotal2.textContent = details.weeklyTotal;
+            sundayTotal2.textContent = details.dailyTotals[0];
+            mondayTotal2.textContent = details.dailyTotals[1];
+            tuesdayTotal2.textContent = details.dailyTotals[2];
+            wednesdayTotal2.textContent = details.dailyTotals[3];
+            thursdayTotal2.textContent = details.dailyTotals[4];
+            fridayTotal2.textContent = details.dailyTotals[5];
+            saturdayTotal2.textContent = details.dailyTotals[6];
+        }
+
+        update();
+    }
+
+    const setupTimeCard = (timecardId) => {
         const timeCells1 = document.getElementsByClassName("edit-time-1-" + timecardId);
         const timeCells2 = document.getElementsByClassName("edit-time-2-" + timecardId);
         const weeklyTotal = document.getElementById("weekly-total-" + timecardId);
@@ -51,7 +124,7 @@ if (hasTimeCard === "true") {
             });
         }
 
-        const getValues1 = (e) => {
+        const getValues1 = () => {
             const details = processTimeCard(timeCells1, "input");
             weeklyTotal.textContent = details.weeklyTotal;
             sundayTotal.textContent = details.dailyTotals[0];
@@ -89,6 +162,13 @@ if (hasTimeCard === "true") {
 
         getValues2();
     }
+
+    for (let i = 0; i < timecardEls.length; i++) {
+        const timecardEl = timecardEls[i];
+        const timecardId = timecardEl.getAttribute("data-timecardid");
+        setupTimeCard(timecardId);
+    }
+
     const timecardsDivChildren = timecardsDiv.children;
     const readyBtn = document.getElementById("ready-btn");
     const unreadyBtn = document.getElementById("unready-btn");
@@ -181,6 +261,8 @@ if (hasTimeCard === "true") {
     const addTimeInOut = async (e) => {
         const timecardId = e.target.getAttribute("data-timecardid");
         const week = e.target.getAttribute("data-week");
+        const shownTimecard = document.getElementsByClassName("shown-timecard")[0];
+        const table = shownTimecard.children[((Number(week) * 2) - 1)];
 
         const addTimeInOutResponse = await fetch("/api/timeinouts/add", {
             method: "POST",
@@ -193,11 +275,92 @@ if (hasTimeCard === "true") {
             },
         });
 
-        console.log(addTimeInOutResponse);
+        if (addTimeInOutResponse.ok) {
+            const weekArr = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+            const newTrIn = document.createElement("tr");
+            newTrIn.setAttribute("class", "tr-in");
+            const newTdIn = document.createElement("td");
+            newTdIn.textContent = "Time In";
+            newTrIn.appendChild(newTdIn);
+            const order = ((table.children[0].children.length - 2) / 2) + 1;
+            for (let i = 0; i < weekArr.length; i++) {
+                const newTd = document.createElement("td");
+                const newInput = document.createElement("input");
+                newInput.setAttribute("id", `${order}_${weekArr[i]}_in_${week}_${timecardId}`);
+                newInput.setAttribute("class", `edit-time-${week}-${timecardId}`);
+                newInput.setAttribute("type", "time");
+                newInput.value = "";
+                newInput.addEventListener('change', newUpdate);
+                newTd.appendChild(newInput);
+                newTrIn.appendChild(newTd);
+            }
+            const newTdWeeklyIn = document.createElement("td");
+            newTrIn.appendChild(newTdWeeklyIn);
+            const newTrOut = document.createElement("tr");
+            newTrOut.setAttribute("class", "tr-out");
+            const newTdOut = document.createElement("td");
+            newTdOut.textContent = "Time Out";
+            newTrOut.appendChild(newTdOut);
+            for (let i = 0; i < weekArr.length; i++) {
+                const newTd = document.createElement("td");
+                const newInput = document.createElement("input");
+                newInput.setAttribute("id", `${order}_${weekArr[i]}_out_${week}_${timecardId}`);
+                newInput.setAttribute("class", `edit-time-${week}-${timecardId}`);
+                newInput.setAttribute("type", "time");
+                newInput.value = "";
+                newInput.addEventListener('change', newUpdate);
+                newTd.appendChild(newInput);
+                newTrOut.appendChild(newTd);
+            }
+            const newTdWeeklyOut = document.createElement("td");
+            newTrOut.appendChild(newTdWeeklyOut);
+
+            const tbody = table.children[0];
+            tbody.insertBefore(newTrIn, tbody.children[tbody.children.length - 1]);
+            tbody.insertBefore(newTrOut, tbody.children[tbody.children.length - 1]);
+        } else {
+            displayMessage("Something went wrong, please refresh and try again.");
+        }
     }
 
     for (let i = 0; i < addTimeInOutBtns.length; i++) {
         const addBtn = addTimeInOutBtns[i];
         addBtn.addEventListener("click", addTimeInOut);
+    }
+
+    const removeTimeInOutsBtns = document.getElementsByClassName("remove-time-in-out-btn");
+
+    const removeTimeInOut = async (e) => {
+        const week = e.target.getAttribute("data-week");
+        const shownTimecard = document.getElementsByClassName("shown-timecard")[0];
+        const timecardId = shownTimecard.getAttribute("id");
+        const table = shownTimecard.children[((Number(week) * 2) - 1)];
+        const tbody = table.children[0];
+
+        const deleteObj = {
+            timecard_id: timecardId,
+            week,
+        }
+        const deleteTimeInOutResponse = await fetch("/api/timeinouts/remove", {
+            method: "DELETE",
+            body: JSON.stringify(deleteObj),
+            headers: {
+                "Content-Type": "application/json"
+            },
+        });
+
+        if (deleteTimeInOutResponse.ok) {
+            const timeInRemove = tbody.children[tbody.children.length - 3];
+            const timeOutRemove = tbody.children[tbody.children.length - 2];
+            timeInRemove.remove();
+            timeOutRemove.remove();
+        } else {
+            displayMessage("Something went wrong, please refresh and try again.");
+        }
+    }
+
+    for (let i = 0; i < removeTimeInOutsBtns.length; i++) {
+        const removeBtn = removeTimeInOutsBtns[i];
+        removeBtn.addEventListener("click", removeTimeInOut);
     }
 }

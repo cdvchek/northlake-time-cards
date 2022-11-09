@@ -21,7 +21,9 @@
 
 #timecard {
     height: calc(100% - 120px);
+    max-height: 30vh;
     display: inline;
+    overflow-y: scroll;
 }
 
 #empl-list {

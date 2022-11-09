@@ -21,13 +21,13 @@
             <table id="table-{{this.timecard_id}}-1">
                 <tr>
                     <th>Week 1</th>
-                    <th>Sunday<br>{{this.startdate}}</th>
-                    <th>Monday<br>{{this.day1}}</th>
-                    <th>Tuesday<br>{{this.day2}}</th>
-                    <th>Wednesday<br>{{this.day3}}</th>
-                    <th>Thursday<br>{{this.day4}}</th>
-                    <th>Friday<br>{{this.day5}}</th>
-                    <th>Saturday<br>{{this.day6}}</th>
+                    <th class="week-day">Sunday<br>{{this.startdate}}</th>
+                    <th class="week-day">Monday<br>{{this.day1}}</th>
+                    <th class="week-day">Tuesday<br>{{this.day2}}</th>
+                    <th class="week-day">Wednesday<br>{{this.day3}}</th>
+                    <th class="week-day">Thursday<br>{{this.day4}}</th>
+                    <th class="week-day">Friday<br>{{this.day5}}</th>
+                    <th class="week-day">Saturday<br>{{this.day6}}</th>
                     <th>Weekly Total</th>
                 </tr>
                 {{#each this.timeInOuts1}}
@@ -65,13 +65,13 @@
             <table id="table-{{this.timecard_id}}-1">
                 <tr>
                     <th>Week 2</th>
-                    <th>Sunday<br>{{this.day7}}</th>
-                    <th>Monday<br>{{this.day8}}</th>
-                    <th>Tuesday<br>{{this.day9}}</th>
-                    <th>Wednesday<br>{{this.day10}}</th>
-                    <th>Thursday<br>{{this.day11}}</th>
-                    <th>Friday<br>{{this.day12}}</th>
-                    <th>Saturday<br>{{this.day13}}</th>
+                    <th class="week-day">Sunday<br>{{this.day7}}</th>
+                    <th class="week-day">Monday<br>{{this.day8}}</th>
+                    <th class="week-day">Tuesday<br>{{this.day9}}</th>
+                    <th class="week-day">Wednesday<br>{{this.day10}}</th>
+                    <th class="week-day">Thursday<br>{{this.day11}}</th>
+                    <th class="week-day">Friday<br>{{this.day12}}</th>
+                    <th class="week-day">Saturday<br>{{this.day13}}</th>
                     <th>Weekly Total</th>
                 </tr>
                 {{#each this.timeInOuts2}}
@@ -115,13 +115,13 @@
             <table id="table-{{this.timecard_id}}-1">
                 <tr>
                     <th>Week 1</th>
-                    <th>Sunday</th>
-                    <th>Monday</th>
-                    <th>Tuesday</th>
-                    <th>Wednesday</th>
-                    <th>Thursday</th>
-                    <th>Friday</th>
-                    <th>Saturday</th>
+                    <th class="week-day">Sunday</th>
+                    <th class="week-day">Monday</th>
+                    <th class="week-day">Tuesday</th>
+                    <th class="week-day">Wednesday</th>
+                    <th class="week-day">Thursday</th>
+                    <th class="week-day">Friday</th>
+                    <th class="week-day">Saturday</th>
                     <th>Weekly Total</th>
                 </tr>
                 {{#each this.timeInOuts1}}
@@ -159,17 +159,18 @@
             <div class="add-time-in-out-div">
                 <button class="add-time-in-out-btn" data-timecardid={{this.timecard_id}} data-week="1">Add Time
                     In/Out</button>
+                <button class="remove-time-in-out-btn" data-week="1">Remove Time In/Out</button>
             </div>
             <table id="table-{{this.timecard_id}}-1">
                 <tr>
                     <th>Week 2</th>
-                    <th>Sunday</th>
-                    <th>Monday</th>
-                    <th>Tuesday</th>
-                    <th>Wednesday</th>
-                    <th>Thursday</th>
-                    <th>Friday</th>
-                    <th>Saturday</th>
+                    <th class="week-day">Sunday</th>
+                    <th class="week-day">Monday</th>
+                    <th class="week-day">Tuesday</th>
+                    <th class="week-day">Wednesday</th>
+                    <th class="week-day">Thursday</th>
+                    <th class="week-day">Friday</th>
+                    <th class="week-day">Saturday</th>
                     <th>Weekly Total</th>
                 </tr>
                 {{#each this.timeInOuts2}}
@@ -207,6 +208,7 @@
             <div class="add-time-in-out-div">
                 <button class="add-time-in-out-btn" data-timecardid={{this.timecard_id}} data-week="2">Add Time
                     In/Out</button>
+                <button class="remove-time-in-out-btn" data-week="2">Remove Time In/Out</button>
             </div>
         </div>
         {{/if}}
