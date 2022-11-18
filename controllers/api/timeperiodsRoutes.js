@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { DateTime } = require('luxon');
-const { User, TimeCard, TimeInOut, TimePeriod, Title } = require('../../models');
+const { User, TimePeriod, Title } = require('../../models');
+const { createTimecard } = require('../../utils');
 
 // API Initialize Time Periods Route
 router.post("/init-timeperiods", async (req, res) => {
@@ -54,20 +55,7 @@ router.post("/init-timeperiods", async (req, res) => {
                 const titles = user.Titles;
                 titles.forEach(async (title) => {
                     for (let i = 0; i < timePeriods.length; i++) {
-                        const timeCard = await TimeCard.create({
-                            timeperiod_id: timePeriods[i].timeperiod_id,
-                            user_id: user.user_id,
-                            title_id: title.title_id,
-                        });
-                        for (let j = 0; j < 2; j++) { // Number of Weeks
-                            for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
-                                await TimeInOut.create({
-                                    timecard_id: timeCard.timecard_id,
-                                    week: j + 1,
-                                    order: k + 1,
-                                });
-                            }
-                        }
+                        createTimecard(timePeriods[i].timeperiod_id, title.user_id, title.title_id);
                     }
                 });
             });

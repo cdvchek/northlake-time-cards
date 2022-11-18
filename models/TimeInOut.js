@@ -18,11 +18,6 @@ TimeInOut.init(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        notes_in: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            defaultValue: "",
-        },
         sunday_in: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -54,11 +49,6 @@ TimeInOut.init(
             defaultValue: "",
         },
         saturday_in: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            defaultValue: "",
-        },
-        notes_out: {
             type: DataTypes.STRING,
             allowNull: false,
             defaultValue: "",

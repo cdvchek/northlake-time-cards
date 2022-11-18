@@ -39,7 +39,7 @@ Title.hasMany(TimeCard, {
 });
 TimeCard.belongsTo(Title, { foreignKey: 'title_id' });
 
-TimeCard.hasMany(OffDay, {
+TimeCard.hasOne(OffDay, {
     foreignKey: 'timecard_id',
     onDelete: 'CASCADE',
 });

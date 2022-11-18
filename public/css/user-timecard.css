@@ -1,18 +1,40 @@
 #background {
-    display: relative;
-    width: calc(100vw - 15px);
-    height: calc(100%);
+    position: relative;
+    width: 100vw;
+    height: 100%;
     min-height: 100vh;
     background-color: gainsboro;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 #timecard {
-    height: calc(100%);
-    padding-bottom: 30px;
+    height: 100%;
 }
 
 #timecards-div {
-    padding-bottom: 70px;
+    padding-bottom: 20px;
+}
+
+.timecard-header {
+    display: flex;
+    align-items: center;
+}
+
+.timecard-header-h3s {
+    width: 30%;
+}
+
+.timecard-identifier-h3 {
+    margin: 15px 0 5px 30px;
+}
+
+.timecard-header-selector {
+    position: absolute;
+    top: 95px;
+    left: 250px;
+    height: 90px;
 }
 
 table {
@@ -46,7 +68,7 @@ td {
     text-align: center;
 }
 
-input {
+.inout-input {
     padding-left: 20%;
     min-width: 100px;
     border: none;
@@ -54,6 +76,14 @@ input {
     right: 1px;
     width: calc(80%);
     height: 100%;
+}
+
+.extra-input {
+    min-width: 100px;
+    height: 98%;
+    background: none;
+    border: none;
+    text-align: center;
 }
 
 div {
@@ -98,96 +128,11 @@ div {
     display: none;
 }
 
-#time-card-modal-options-div {
-    z-index: 5;
-    display: none;
-    position: fixed;
-    top: 0;
-    right: 0;
-    height: 100vh;
-    width: 100vw;
-    background-color: rgb(0, 0, 0);
-    background-color: rgba(0, 0, 0, 0.4);
-}
-
-#close-options-btn {
-    z-index: 10;
-    position: absolute;
-    right: 5px;
-    top: 5px;
-    border: none;
-    background-color: grey;
-    border-radius: 4px;
-    width: 35px;
-    height: 35px;
-    color: white;
-    padding: 0;
-    outline: none;
-    font-size: 110%;
-}
-
-#close-options-btn:hover {
-    background-color: rgb(100, 100, 100);
-}
-
-#close-options-btn:active {
-    background-color: rgb(60, 60, 60);
-}
-
-#time-card-list-div {
-    z-index: 7;
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 100%;
-    width: 30%;
-    background-color: white;
-    overflow-y: scroll;
-}
-
-.time-card-selector {
-    z-index: 9;
-    height: 210px;
-    text-align: center;
-    padding-bottom: 15px 0;
-    margin: 15px auto 10px auto;
-    border: 1px solid;
-    width: 90%;
-    overflow-y: hidden;
-}
-
-.time-card-selector:hover {
-    background-color: rgb(100, 100, 100);
-    background-color: rgba(100, 100, 100, 0.4);
-}
-
-.time-card-selector:active {
-    background-color: rgb(60, 60, 60);
-    background-color: rgba(60, 60, 60, 0.4);
-}
-
-.time-card-identifier {
-    z-index: 8;
-    margin: 5px;
-}
-
-.mini-table {
-    z-index: 8;
-    margin: 5px auto;
-    width: 80%;
-    height: 41.5%;
-}
-
-.mini-table-cell {
-    height: 5px;
-    font-size: 5px;
-}
-
 .ready-btn {
     z-index: 2;
     position: fixed;
-    right: 90px;
-    bottom: 10px;
+    right: 37px;
+    top: 80px;
     width: 140px;
     height: 50px;
     background-color: rgb(9, 139, 175);
@@ -199,26 +144,6 @@ div {
 
 #unready-btn {
     background-color: grey;
-}
-
-#open-options-btn {
-    z-index: 2;
-    position: fixed;
-    right: 20px;
-    bottom: 10px;
-    width: 50px;
-    height: 50px;
-    background-color: grey;
-    border: none;
-    color: white;
-    font-size: 200%;
-    box-shadow: 0 0 15px grey;
-}
-
-.timecard-identifier-h3 {
-    display: inline-block;
-    margin-bottom: 5px;
-    padding-left: 55px;
 }
 
 .add-time-in-out-btn {

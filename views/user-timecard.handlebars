@@ -2,22 +2,108 @@
 <div id="background">
     {{> navbar}}
     {{#if hasTimeCard}}
-    {{#if isFirstTimeCardReady}}
-    <button id="ready-btn" class="hide ready-btn">Ready</button>
-    <button id="unready-btn" class="show ready-btn">Unready</button>
-    <button id="open-options-btn">=</button>
-    {{else}}
-    <button id="ready-btn" class="show ready-btn">Ready</button>
-    <button id="unready-btn" class="hide ready-btn">Unready</button>
-    <button id="open-options-btn">=</button>
-    {{/if}}
+
+    {{!-- Ready/Unready Buttons --}}
+    <button id="ready-btn" class="{{readyStatus}} ready-btn">Ready</button>
+    <button id="unready-btn" class="{{unreadyStatus}} ready-btn">Unready</button>
+
+    <div class="timecard-header-selector">
+        <select id="title-select" name="title-select" class="title-select timecard-selector">
+            {{#each titles}}
+            <option value={{this.title_id}}>{{this.name}}</option>
+            {{/each}}
+        </select>
+        <select id="period-select" name="period-select" class="period-select timecard-selector">
+            {{#each periods}}
+            <option value={{this.timeperiod_id}}>{{this.periodName}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    {{!-- TimeCards --}}
     <div id="timecards-div" data-timecard="true">
         {{#each timecards}}
+        <div id="{{this.period_id}}-{{this.title_id}}" data-timecardid={{this.timecard_id}} data-isapproved={{this.isApproved}} data-isready={{this.isReadyToBeApproved}}
+            data-titleid={{this.title_id}} data-periodid={{this.period_id}} {{#if this.isFirst}}
+            class="shown-timecard timecard" {{else}} class="hidden-timecard timecard" {{/if}}>
+            <div class="timecard-header">
+                <div class="timecard-header-h3s">
+                    <h3 class="timecard-identifier-h3">{{this.titlename}}</h3>
+                    <h3 class="timecard-identifier-h3">{{this.day0}} - {{this.day13}}</h3>
+                </div>
+            </div>
+            {{#each this.weeks}}
+            <table id="table-{{this.timecard_id}}">
+                {{#each this.trs}}
+                <tr {{#if this.isInOut}} class={{this.inout}} {{/if}}>
+                    {{#each this.cells}}
+                    <{{this.cellType}} 
+
+                        {{#if this.id}} 
+                            id={{this.idValue}}
+                        {{/if}} 
+                        
+                        {{#if this.class}}
+                            class={{this.classValue}}
+                        {{/if}} 
+                        
+                        {{#each this.dataAttributes}}
+                            data-{{this.data}}={{this.dataValue}}
+                        {{/each}}>
+
+                        {{#if this.breaks}}
+                            {{#each this.cellValues}}
+                                {{this.miniValue}} <br>
+                            {{/each}}
+                            {{this.lastValue}}
+                        {{/if}}
+
+                        {{#if this.isNotApproved}}
+
+                            {{#if this.isInOut}}
+                                <input 
+                                {{#each this.inputDataAttributes}}
+                                    data-{{this.data}}={{this.dataValue}}
+                                {{/each}}
+                                class="{{this.classValue}} inout-input" type="time" value={{this.cellValue}}>
+                            {{/if}}
+
+                            {{#if this.isExtraRow}}
+                                <input
+                                {{#each this.inputDataAttributes}}
+                                    data-{{this.data}}={{this.dataValue}}
+                                {{/each}}
+                                id={{this.idValue}} class="{{this.classValue}} extra-input" type="number" value={{this.cellValue}}>
+                            {{/if}}
+
+                        {{/if}}
+
+                        {{#if this.justText}}
+                            {{this.cellValue}}
+                        {{/if}}
+
+                    </{{this.cellType}}>
+                    {{/each}}
+                </tr>
+                {{/each}}
+            </table>
+            {{#if this.isNotApproved}}
+            <div class="add-time-in-out-div">
+                <button class="add-time-in-out-btn" data-timecardid={{this.timecard_id}} data-week={{this.week}}>Add Time
+                    In/Out</button>
+                <button class="remove-time-in-out-btn" data-week={{this.week}}>Remove Time In/Out</button>
+            </div>
+            {{/if}}
+            {{/each}}
+        </div>
+        {{/each}}
+
+        {{!-- {{#each timecards}}
         {{#if this.isApproved}}
         <div id={{this.timecard_id}} data-isready={{this.isReadyToBeApproved}} data-title={{this.title}}
             data-timecardid={{this.timecard_id}} data-period={{this.period}} {{#if this.isFirst}}
             class="shown-timecard timecard" {{else}} class="hidden-timecard timecard" {{/if}}>
-            <h3 class="timecard-identifier-h3">{{this.startdate}} - {{this.enddate}} {{this.titlename}}</h3>
+            <h3 class="timecard-identifier-h3">{{this.titlename}} <br> {{this.startdate}} - {{this.enddate}}</h3>
             <table id="table-{{this.timecard_id}}-1">
                 <tr>
                     <th>Week 1</th>
@@ -50,6 +136,41 @@
                     <td></td>
                 </tr>
                 {{/each}}
+                <tr>
+                    <td>Vacation</td>
+                    {{#each this.vacation}}
+                    <td id="{{this.dayNumber}}-vacation-{{this.timecard_id}}"></td>
+                    {{/each}}
+                    <td id="1-vacation-{{this.timecard_id}}"></td>
+                    <td id="2-vacation-{{this.timecard_id}}"></td>
+                    <td id="3-vacation-{{this.timecard_id}}"></td>
+                    <td id="4-vacation-{{this.timecard_id}}"></td>
+                    <td id="5-vacation-{{this.timecard_id}}"></td>
+                    <td id="6-vacation-{{this.timecard_id}}"></td>
+                    <td id="weekly-vacation-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
+                    <td>Sick</td>
+                    <td id="0-sick-{{this.timecard_id}}"></td>
+                    <td id="1-sick-{{this.timecard_id}}"></td>
+                    <td id="2-sick-{{this.timecard_id}}"></td>
+                    <td id="3-sick-{{this.timecard_id}}"></td>
+                    <td id="4-sick-{{this.timecard_id}}"></td>
+                    <td id="5-sick-{{this.timecard_id}}"></td>
+                    <td id="6-sick-{{this.timecard_id}}"></td>
+                    <td id="weekly-sick-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
+                    <td>Overtime</td>
+                    <td id="0-overtime-{{this.timecard_id}}"></td>
+                    <td id="1-overtime-{{this.timecard_id}}"></td>
+                    <td id="2-overtime-{{this.timecard_id}}"></td>
+                    <td id="3-overtime-{{this.timecard_id}}"></td>
+                    <td id="4-overtime-{{this.timecard_id}}"></td>
+                    <td id="5-overtime-{{this.timecard_id}}"></td>
+                    <td id="6-overtime-{{this.timecard_id}}"></td>
+                    <td id="weekly-overtime-{{this.timecard_id}}"></td>
+                </tr>
                 <tr>
                     <td>Daily Total</td>
                     <td id="0-total-{{this.timecard_id}}"></td>
@@ -94,6 +215,39 @@
                     <td></td>
                 </tr>
                 {{/each}}
+                <tr>
+                    <td>Vacation</td>
+                    <td id="0-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="1-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="2-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="3-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="4-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="5-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="6-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="weekly-vacation-2-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
+                    <td>Sick</td>
+                    <td id="0-sick-2-{{this.timecard_id}}"></td>
+                    <td id="1-sick-2-{{this.timecard_id}}"></td>
+                    <td id="2-sick-2-{{this.timecard_id}}"></td>
+                    <td id="3-sick-2-{{this.timecard_id}}"></td>
+                    <td id="4-sick-2-{{this.timecard_id}}"></td>
+                    <td id="5-sick-2-{{this.timecard_id}}"></td>
+                    <td id="6-sick-2-{{this.timecard_id}}"></td>
+                    <td id="weekly-sick-2-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
+                    <td>Overtime</td>
+                    <td id="0-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="1-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="2-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="3-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="4-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="5-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="6-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="weekly-overtime-2-{{this.timecard_id}}"></td>
+                </tr>
                 <tr>
                     <td>Daily Total</td>
                     <td id="0-total-2-{{this.timecard_id}}"></td>
@@ -145,6 +299,39 @@
                 </tr>
                 {{/each}}
                 <tr>
+                    <td>Vacation</td>
+                    <td id="0-vacation-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="1-vacation-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="2-vacation-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="3-vacation-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="4-vacation-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="5-vacation-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="6-vacation-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="weekly-vacation-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
+                    <td>Sick</td>
+                    <td id="0-sick-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="1-sick-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="2-sick-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="3-sick-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="4-sick-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="5-sick-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="6-sick-{{this.timecard_id}}"><input type="number" value={{this.}}> hrs</td>
+                    <td id="weekly-sick-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
+                    <td>Overtime</td>
+                    <td id="0-overtime-{{this.timecard_id}}"></td>
+                    <td id="1-overtime-{{this.timecard_id}}"></td>
+                    <td id="2-overtime-{{this.timecard_id}}"></td>
+                    <td id="3-overtime-{{this.timecard_id}}"></td>
+                    <td id="4-overtime-{{this.timecard_id}}"></td>
+                    <td id="5-overtime-{{this.timecard_id}}"></td>
+                    <td id="6-overtime-{{this.timecard_id}}"></td>
+                    <td id="weekly-overtime-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
                     <td>Daily Total</td>
                     <td id="0-total-{{this.timecard_id}}"></td>
                     <td id="1-total-{{this.timecard_id}}"></td>
@@ -194,6 +381,39 @@
                 </tr>
                 {{/each}}
                 <tr>
+                    <td>Vacation</td>
+                    <td id="0-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="1-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="2-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="3-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="4-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="5-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="6-vacation-2-{{this.timecard_id}}"></td>
+                    <td id="weekly-vacation-2-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
+                    <td>Sick</td>
+                    <td id="0-sick-2-{{this.timecard_id}}"></td>
+                    <td id="1-sick-2-{{this.timecard_id}}"></td>
+                    <td id="2-sick-2-{{this.timecard_id}}"></td>
+                    <td id="3-sick-2-{{this.timecard_id}}"></td>
+                    <td id="4-sick-2-{{this.timecard_id}}"></td>
+                    <td id="5-sick-2-{{this.timecard_id}}"></td>
+                    <td id="6-sick-2-{{this.timecard_id}}"></td>
+                    <td id="weekly-sick-2-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
+                    <td>Overtime</td>
+                    <td id="0-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="1-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="2-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="3-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="4-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="5-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="6-overtime-2-{{this.timecard_id}}"></td>
+                    <td id="weekly-overtime-2-{{this.timecard_id}}"></td>
+                </tr>
+                <tr>
                     <td>Daily Total</td>
                     <td id="0-total-2-{{this.timecard_id}}"></td>
                     <td id="1-total-2-{{this.timecard_id}}"></td>
@@ -212,9 +432,9 @@
             </div>
         </div>
         {{/if}}
-        {{/each}}
+        {{/each}} --}}
     </div>
-    <div id="time-card-modal-options-div">
+    {{!-- <div id="time-card-modal-options-div">
         <button id="close-options-btn">X</button>
         <div id="time-card-list-div">
             {{#each timecards}}
@@ -284,7 +504,7 @@
             </div>
             {{/each}}
         </div>
-    </div>
+    </div> --}}
     {{else}}
     <p id="timecards-div" data-timecard="false">You don't have any time cards.</p>
     {{/if}}

@@ -1,29 +1,22 @@
 <link rel="stylesheet" href="../css/admin-submittimecard.css">
 <div id="background">
     {{> navbar}}
-    <div id="current-timecards">
-        <div id="current-approved-timecards">
-
-        </div>
-        <div id="current-notapproved-timecards">
-
-        </div>
+    {{#each timeperiods}}
+    <div class="dropdown" data-id={{this.sectionId}}>
+        <h3>{{this.timeperiodname}}</h3>
     </div>
-    <div id="previous-timecards">
-        <div id="previous-approved-timecards">
-
+    <div id={{this.sectionId}} class="timecards-section">
+        {{#each this.approvedGroups}}
+        <div id={{this.sectionIdApproved}}>
+            <h4>{{this.sectionApproved}}</h4>
+            {{#each this.timecards}}
+            <div class="timecard-display">
+                <p>User: {{this.username}} - {{this.titlename}} Supervisor: {{this.supervisorname}}</p>
+            </div>
+            {{/each}}
         </div>
-        <div id="previous-notapproved-timecards">
-
-        </div>
+        {{/each}}
     </div>
-    <div id="twoprevious-timecards">
-        <div id="twoprevious-approved-timecards">
-
-        </div>
-        <div id="twoprevious-notapproved-timecards">
-
-        </div>
-    </div>
+    {{/each}}
 </div>
 <script src="../js/admin-submittimecard"></script>

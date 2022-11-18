@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const { User, TimeCard, TimeInOut, TimePeriod, Title } = require('../../models');
+const { createTimecard } = require('../../utils');
 
 
 // API Get User by ID
@@ -119,20 +120,7 @@ router.post("/admin-signup", async (req, res) => {
                 const timeperiodIds = [currentTimePeriodId, previousTimePeriodId, twoPreviousTimePeriodId];
                 timeperiodIds.forEach((timeperiod_id) => {
                     titles.forEach(async (title) => {
-                        const timeCard = await TimeCard.create({
-                            timeperiod_id,
-                            user_id: newAdmin.user_id,
-                            title_id: title.title_id,
-                        });
-                        for (let j = 0; j < 2; j++) { // Number of Weeks
-                            for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
-                                await TimeInOut.create({
-                                    timecard_id: timeCard.timecard_id,
-                                    week: j + 1,
-                                    order: k + 1,
-                                });
-                            }
-                        }
+                        createTimecard(timeperiod_id, title.user_id, title.title_id);
                     });
                 });
             }
@@ -193,20 +181,7 @@ router.post("/user-signup", async (req, res) => {
 
                 for (let i = 0; i < timePeriods.length; i++) {
                     titles.forEach(async (title) => {
-                        const timeCard = await TimeCard.create({
-                            timeperiod_id: timePeriods[i].timeperiod_id,
-                            user_id: newUser.user_id,
-                            title_id: title.title_id,
-                        });
-                        for (let j = 0; j < 2; j++) { // Number of Weeks
-                            for (let k = 0; k < 4; k++) { // Number of TimeInOuts per week
-                                await TimeInOut.create({
-                                    timecard_id: timeCard.timecard_id,
-                                    week: j + 1,
-                                    order: k + 1,
-                                });
-                            }
-                        }
+                        createTimecard(timePeriods[i].timeperiod_id, title.user_id, title.title_id);
                     });
                 }
                 res.json(newUser);

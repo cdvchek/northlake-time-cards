@@ -1,10 +1,13 @@
-const processTimeCard = (timeCells, type = "cell") => {
+const processTimeCard = (timeCells, vacationTimeCells, sickTimeCells, type = "cell") => {
+    // Declaring Variables
     let timesheet = [];
     const weeklyOffset = 7 // 7 days in a week
+
+    // Preparing the timesheet
     for (let i = 0; i < timeCells.length; i++) {
         const row = Math.floor(i / weeklyOffset);
         const column = i % weeklyOffset;
-        let value = timeCells[i].textContent;
+        let value = timeCells[i].innerText;
         if (type === "input") {
             value = timeCells[i].value;
         }
@@ -14,11 +17,17 @@ const processTimeCard = (timeCells, type = "cell") => {
         timesheet[row][column] = value;
     }
 
+    // Declaring Variables
     const details = {
+        dailyOvertimes: [0, 0, 0, 0, 0, 0, 0],
+        weeklyOvertime: 0,
         dailyTotals: [0, 0, 0, 0, 0, 0, 0],
         weeklyTotal: 0,
+        vacation: 0,
+        sick: 0,
     };
 
+    // Setting dailyTotals
     for (let i = 1; i < timesheet.length; i += 2) {
         for (let j = 0; j < timesheet[i].length; j++) {
             // Checking to see if both time in and out are filled out
@@ -34,11 +43,50 @@ const processTimeCard = (timeCells, type = "cell") => {
             }
         }
     }
+
+    // Accounting for sick and vacation to offset dailyTotals
+    // Setting sick and vacation
+    let vacationTotal = 0;
+    let sickTotal = 0;
+    for (let i = 0; i < details.dailyTotals.length; i++) {
+        let total = details.dailyTotals[i];
+        const sickCell = sickTimeCells[i];
+        const vacationCell = vacationTimeCells[i];
+        let sickValue;
+        let vacationValue;
+        if (type === "input") {
+            sickValue = sickCell.value;
+            vacationValue = vacationCell.value;
+        } else {
+            sickValue = sickCell.textContent;
+            vacationValue = vacationCell.textContent;
+        }
+        vacationTotal = vacationTotal + Number(vacationValue);
+        sickTotal = sickTotal + Number(sickValue);
+        total = total + Number(sickValue) + Number(vacationValue);
+        details.dailyTotals[i] = total;
+    }
+    details.vacation = vacationTotal;
+    details.sick = sickTotal;
+
+    // Setting weeklyTotal
     let weeklyTotal = 0;
     for (let i = 0; i < details.dailyTotals.length; i++) {
         weeklyTotal += details.dailyTotals[i];
     }
     details.weeklyTotal = weeklyTotal;
+
+    // Setting dailyOvertimes and weeklyOvertime
+    let overtimeTotal = 0;
+    for (let i = 0; i < details.dailyTotals.length; i++) {
+        const total = details.dailyTotals[i];
+        if (total > 8) {
+            const overtime = total - 8;
+            details.dailyOvertimes[i] = overtime;
+            overtimeTotal = overtimeTotal + overtime;
+        }
+    }
+    details.weeklyOvertime = overtimeTotal;
 
     return details;
 }

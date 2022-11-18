@@ -1,36 +1,41 @@
 const express = require('express');
 const router = express.Router();
-const { TimeCard, TimeInOut, TimePeriod, Title } = require('../../models');
+const { TimeCard, TimeInOut, TimePeriod, Title, OffDay } = require('../../models');
 const { DateTime } = require('luxon');
-
-
-function compareTimeInOuts(a, b) {
-    return a.order - b.order;
-}
+const { createTimecard } = require("../../utils");
 
 // User Current Time Card - RESTR
 router.get("/", async (req, res) => {
     try {
         // Check to see if the user is registered
         if (req.session.user) {
+            let hbsObj;
 
             // Grabbing the current timeperiod
-            const timeperiod = await TimePeriod.findOne({
+            const timeperiodRaw = (await TimePeriod.findOne({
                 where: {
                     isCurrent: true,
                 }
-            });
+            }));
+
+            let timeperiod;
+            if (timeperiodRaw) {
+                timeperiod = timeperiodRaw.dataValues;
+            }
 
             // CHECKING TO SEE IF WE NEED A NEW TIMEPERIOD
 
             // Checking to see if time periods have been initialized
-            if (timeperiod !== null) {
+            if (timeperiodRaw !== null) {
 
                 // Creating date objects
-                const startDateObj = DateTime.fromISO(timeperiod.dataValues.date_start);
+                const startDateObj = DateTime.fromISO(timeperiod.date_start);
                 const endDateObj = DateTime.fromISO(startDateObj.plus({ days: 14 }).toISODate());
                 const newStartDate = endDateObj.plus({ days: 1 }).toISODate();
                 const nowDateObj = DateTime.now();
+
+                // Grabbing all the titles for use in the next if
+                const titles = (await Title.findAll()).map((title) => title.dataValues);
 
                 // Comparing the end of the current time period with todays date
                 if (endDateObj.startOf("day") < nowDateObj.startOf("day")) {
@@ -74,247 +79,331 @@ router.get("/", async (req, res) => {
 
                     // Creating a new set of timecards for each user for the new timeperiod
 
-                    // Grabbing all the titles
-                    const titles = (await Title.findAll()).map((title) => title.dataValues);
-
                     // Looping over each title and creating a new timecard
                     titles.forEach(async (title) => {
-
-                        // Create a new timecard associated with the new time period
-                        const newTimeCard = await TimeCard.create({
-                            timeperiod_id: newTimeperiod.timeperiod_id,
-                            user_id: title.user_id,
-                            title_id: title.title_id,
-                        });
-
-                        // Creating 8 timeinouts for the new timecard
-                        // 2 weeks per timecard and each week has a default of 4 timeinouts
-                        for (let j = 0; j < 2; j++) { // 2 weeks
-                            for (let k = 0; k < 4; k++) { // 4 timeinouts per week
-                                await TimeInOut.create({
-                                    timecard_id: newTimeCard.timecard_id,
-                                    week: j + 1,
-                                    order: k + 1,
-                                });
-                            }
-                        }
+                        createTimecard(newTimeperiod.timeperiod_id, title.user_id, title.title_id);
                     });
                 }
-            }
 
-            // END OF CHECKING FOR NEW TIME PERIODS
+                // END OF CHECKING FOR NEW TIME PERIODS
 
-            // Declaring the handlebars object
-            let hbsObj = {};
-
-            // Grabbing the current timeperiod
-            const currentTimePeriodRaw = (await TimePeriod.findOne({
-                where: {
-                    isCurrent: true,
-                }
-            }));
-
-            // Checking that there is a current timeperiod
-            if (currentTimePeriodRaw !== null) {
-
-                // Grabbing the useful data from the current timeperiod
-                const currentTimePeriod = currentTimePeriodRaw.dataValues;
-
-                // Grabbing the previous timeperiod
-                const previousTimePeriod = (await TimePeriod.findOne({
-                    where: {
-                        isPrevious: true,
-                    }
-                })).dataValues;
-
-                // Grabbing the two previous timeperiod
-                const twoPreviousTimePeriod = (await TimePeriod.findOne({
-                    where: {
-                        isTwoPrevious: true,
-                    }
-                })).dataValues;
-
-                // Grabbing the user's current timecard(s)
-                const currentTimeCards = (await TimeCard.findAll({
+                // Grabbing the users timecards
+                const allTimeCards = (await TimeCard.findAll({
                     where: {
                         user_id: req.session.user.user_id,
-                        timeperiod_id: currentTimePeriod.timeperiod_id,
                     },
                     include: TimeInOut,
                 })).map((timecard) => timecard.dataValues);
 
-                // If the user has current timecards
-                if (currentTimeCards) {
+                for (let i = 0; i < allTimeCards.length; i++) {
+                    const timecard = allTimeCards[i];
+                    timecard.TimeInOuts = timecard.TimeInOuts.map((timeinout) => timeinout.dataValues);
+                }
 
-                    // Grabbing the user's previous timecard(s)
-                    const previousTimeCards = (await TimeCard.findAll({
+                let timecards;
+                let isFirstReady;
+
+                // Checking to see if the user has timecards
+                if (allTimeCards) {
+
+                    // Grabbing the other two periods
+                    const previousTimeperiod = (await TimePeriod.findOne({
+                        where: {
+                            isPrevious: true,
+                        }
+                    })).dataValues;
+                    const twoPreviousTimeperiod = (await TimePeriod.findOne({
+                        where: {
+                            isTwoPrevious: true,
+                        }
+                    })).dataValues;
+
+                    const currentTimecards = allTimeCards.filter((timecard) => (timecard.timeperiod_id === timeperiod.timeperiod_id));
+                    const previousTimecards = allTimeCards.filter((timecard) => (timecard.timeperiod_id === previousTimeperiod.timeperiod_id));
+                    const twoPreviousTimecards = allTimeCards.filter((timecard) => (timecard.timeperiod_id === twoPreviousTimeperiod.timeperiod_id));
+
+                    const userTitles = (await Title.findAll({
                         where: {
                             user_id: req.session.user.user_id,
-                            timeperiod_id: previousTimePeriod.timeperiod_id,
-                        },
-                        include: TimeInOut,
-                    })).map((timecard) => timecard.dataValues);
+                        }
+                    })).map((title) => title.dataValues);
+                    
+                    const usableTitles = userTitles.map((title) => {
+                        return {
+                            title_id: title.title_id,
+                            name: title.name,
+                        }
+                    });
+                    
+                    const periods = [timeperiod, previousTimeperiod, twoPreviousTimeperiod];
 
-                    // Grabbing the user's two previous timecard(s)
-                    const twoPreviousTimeCards = (await TimeCard.findAll({
-                        where: {
-                            user_id: req.session.user.user_id,
-                            timeperiod_id: twoPreviousTimePeriod.timeperiod_id,
-                        },
-                        include: TimeInOut,
-                    })).map((timecard) => timecard.dataValues);
-
-                    // Putting all the timecards into an array (ordered)
-                    const allTimeCards = [...currentTimeCards, ...previousTimeCards, ...twoPreviousTimeCards];
-
-                    // Getting rid of unwanted data
-                    allTimeCards.forEach((timecard) => {
-                        timecard.TimeInOuts = timecard.TimeInOuts.map((timeinout) => timeinout.dataValues);
+                    const usablePeriods = periods.map((period) => {
+                        const startDateObj = DateTime.fromISO(period.date_start);
+                        const startDate = startDateObj.toISODate();
+                        const endDate = startDateObj.plus({ days: 13 }).toISODate();
+                        const [startYear, startMonth, startDay] = startDate.split("-");
+                        const [endYear, endMonth, endDay] = endDate.split("-");
+                        let periodIdentifier = "Current";
+                        if (period.isPrevious) {
+                            periodIdentifier = "Previous";
+                        } else if (period.isTwoPrevious) {
+                            periodIdentifier = "Two Periods Ago"
+                        }
+                        const periodName = `${startMonth}/${startDay}/${startYear} - ${endMonth}/${endDay}/${endYear} | ${periodIdentifier}`;
+                        
+                        return {
+                            timeperiod_id: period.timeperiod_id,
+                            periodName,
+                        }
                     });
 
-                    // Constant utility array
-                    const week = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+                    timecards = [...currentTimecards, ...previousTimecards, ...twoPreviousTimecards];
 
-                    // Declaring a variable
-                    let firstTitleId;
+                    timecards = await Promise.all(timecards.map(async (timecard) => {
+                        // Finding the title
+                        const title = await (await Title.findByPk(timecard.title_id)).dataValues;
 
-                    // For each time card we want to prepare its data for the handlebars template
-                    allTimeCards.forEach(async (timecard, i) => {
+                        // Is First or Not
+                        let isFirst = false;
+                        if ((timecard.title_id === usableTitles[0].title_id) && (timecard.timeperiod_id === periods[0].timeperiod_id)) {
+                            isFirst = true;
+                            isFirstReady = timecard.isReadyToBeApproved;
+                        }
 
-                        // Mapping the timeinouts for the timecard
-                        const timeInOuts = timecard.TimeInOuts.map((timeinout) => {
+                        // Finding the dates
+                        let thisTimePeriod;
+                        if (timecard.timeperiod_id === timeperiod.timeperiod_id) {
+                            thisTimePeriod = timeperiod;
+                        } else if (timecard.timeperiod_id === previousTimeperiod.timeperiod_id) {
+                            thisTimePeriod = previousTimeperiod;
+                        } else {
+                            thisTimePeriod = twoPreviousTimeperiod;
+                        }
 
-                            // Declaring variables
-                            const times_in = [];
-                            const times_out = [];
+                        const startDateObj = DateTime.fromISO(thisTimePeriod.date_start);
+                        const dates = [];
+                        for (let i = 0; i < 14; i++) {
+                            const date = startDateObj.plus({ days: i }).toISODate();
+                            const dateArr = date.split("-");
+                            const day = dateArr[2];
+                            const month = dateArr[1];
+                            const year = dateArr[0];
+                            const dateString = `${month}/${day}/${year}`;
+                            dates.push(dateString);
+                        }
 
-                            // Looping through a time_in and a time_out and 7 days a week
-                            for (let j = 0; j < 2; j++) { // j = 0, time in // j = 1, time out
-                                for (let i = 0; i < week.length; i++) { // 7 days in a week
+                        const weekOneInOuts = timecard.TimeInOuts.filter((timeinout) => (timeinout.week === 1));
+                        const weekTwoInOuts = timecard.TimeInOuts.filter((timeinout) => (timeinout.week === 2));
+                        
+                        const allInOuts = [weekOneInOuts, weekTwoInOuts];
 
-                                    // Grabbing the day string from the utility array
-                                    const day = week[i];
+                        // Preparing the data for the table
+                        const week = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+                        const extraRows = ["vacation", "sick", "overtime", "total"];
 
-                                    // Deciding if its a time in or a time out
-                                    let valueType;
-                                    if (j == 0) {
-                                        valueType = "in"
-                                    } else {
-                                        valueType = "out"
+                        const weeks = [];
+                        const isNotApproved = !timecard.isApproved;
+
+                        for (let i = 0; i < 2; i++) {
+                            const weekObj = {
+                                timecard_id: timecard.timecard_id,
+                                week: `${i + 1}`,
+                                trs: [],
+                                isNotApproved,
+                            }
+                            // Header Row
+                            const headerTrObj = {
+                                cells: [
+                                    {   
+                                        cellType: "th",
+                                        cellValue: `Week ${i + 1}`,
+                                        justText: true,
+                                    },
+                                    {
+                                        cellType: "th",
+                                        cellValue: "Weekly Total",
+                                        justText: true,
                                     }
+                                ],
+                            }     
+                            for (let j = 0; j < week.length; j++) {
+                                const weekDay = week[j];
+                                const weekDayCapitalized = weekDay.charAt(0).toUpperCase() + weekDay.slice(1);
+                                let lastValue;
+                                if (i === 0) {
+                                    lastValue = dates[j];
+                                } else {
+                                    lastValue = dates[j + 7];
+                                }
+                                const cellObj = {
+                                    cellType: "th",
+                                    class: true,
+                                    classValue: "week-day",
+                                    breaks: true,
+                                    cellValues: [{ miniValue: weekDayCapitalized }],
+                                    lastValue: lastValue,
+                                }
+                                headerTrObj.cells.splice(headerTrObj.cells.length - 1, 0, cellObj);
+                            }
+                            weekObj.trs.push(headerTrObj);
 
-                                    // Data prepared for the handlebars template
-                                    const obj = {
-                                        name: `${timeinout.order}_${day}_${valueType}_${timeinout.week}_${timecard.timecard_id}`,
-                                        value: timeinout[day + "_" + valueType],
-                                        cellsClass: `edit-time-${timeinout.week}-${timecard.timecard_id}`
-                                    };
-
-                                    // Pushing to the correct array
-                                    if (j == 0) {
-                                        times_in.push(obj);
-                                    } else {
-                                        times_out.push(obj);
+                            // InOut Rows
+                            for (let j = 0; j < allInOuts[i].length; j++) {
+                                for (let k = 0; k < 2; k++) {
+                                    const inout = ["in", "out"][k];
+                                    const inoutCapitalized = inout.charAt(0).toUpperCase() + inout.slice(1);
+                                    const timeinout = allInOuts[i][j];
+                                    const trObj = {
+                                        cells: [
+                                            {
+                                                cellType: "td",
+                                                cellValue: `Time ${inoutCapitalized}`,
+                                                justText: true,
+                                            },
+                                            {
+                                                cellType: "td",
+                                                cellValue: "",
+                                                justText: true,
+                                            }
+                                        ],
+                                        isInOut: true,
+                                        inout: `tr-${inout}`,
                                     }
+                                    for (let l = 0; l < week.length; l++) {
+                                        const weekDay = week[l];
+                                        const cellObj = {
+                                            cellType: "td",
+                                            inputDataAttributes: [
+                                                { data: "order", dataValue: timeinout.order },
+                                                { data: "day", dataValue: weekDay },
+                                                { data: "week", dataValue: timeinout.week },
+                                                { data: "inout", dataValue: inout },
+                                                { data: "timecardid", dataValue: timecard.timecard_id }
+                                            ],
+                                            cellValue: timeinout[`${week[l]}_${inout}`],
+                                            isInOut: true,
+                                            classValue: `${i + 1}-${timecard.timecard_id}`,
+                                        }
+                                        if (timecard.isApproved) {
+                                            cellObj.isNotApproved = false;
+                                            cellObj.justText = true;
+                                            cellObj.isInOut = false;
+                                            cellObj.class = true;
+                                        } else {
+                                            cellObj.isNotApproved = true;
+                                        }
+                                        trObj.cells.splice(trObj.cells.length - 1, 0, cellObj);
+                                    }
+                                    weekObj.trs.push(trObj);
                                 }
                             }
-
-                            // Mapping return
-                            return {
-                                ...timeinout,
-                                times_in,
-                                times_out,
+                            
+                            // Vaction, Sick, Overtime, Total Rows
+                            const offDay = (await OffDay.findOne({
+                                where: {
+                                    timecard_id: timecard.timecard_id,
+                                }
+                            })).dataValues;
+                            for (let j = 0; j < extraRows.length; j++) {
+                                const extraRow = extraRows[j];
+                                const extraRowCapitalized = extraRow.charAt(0).toUpperCase() + extraRow.slice(1);
+                                const trObj = {
+                                    cells: [
+                                        {
+                                            cellType: "td",
+                                            cellValue: `${extraRowCapitalized} (hrs)`,
+                                            justText: true,
+                                        },
+                                        {
+                                            cellType: "td",
+                                            cellValue: "",
+                                            id: true,
+                                            idValue: `weekly-${extraRow}-${i + 1}-${timecard.timecard_id}`, // "weekly-type-week-timecardId"
+                                            justText: true,
+                                        }
+                                    ]
+                                }
+                                for (let k = 0; k < week.length; k++) {
+                                    const weekDay = week[k];
+                                    let isNotApproved = !timecard.isApproved;
+                                    let justText = !isNotApproved;
+                                    let cellValue;
+                                    if (j < 2) {
+                                        cellValue = offDay[`${weekDay}_${extraRow}_${i + 1}`];
+                                    } else {
+                                        isNotApproved = false;
+                                        justText = true;
+                                        cellValue = "";
+                                    }
+                                    const cellObj = {
+                                        cellType: "td",
+                                        id: true,
+                                        idValue: `${extraRow}-${i + 1}-${weekDay}-${timecard.timecard_id}`, // "type-week-day-timecardId"
+                                        cellValue,
+                                        justText,
+                                        isNotApproved,
+                                        isExtraRow: true,
+                                        inputDataAttributes: [
+                                            { data: "extratype", dataValue: extraRow },
+                                            { data: "timecardid", dataValue: timecard.timecard_id },
+                                        ],
+                                        classValue: `${extraRow}-${i + 1}-${timecard.timecard_id}`,
+                                    }
+                                    if (isNotApproved) {
+                                        cellObj.idValue = `${weekDay}_${extraRow}_${i + 1}`;
+                                    } else {
+                                        cellObj.class = true;
+                                    }
+                                    trObj.cells.splice(trObj.cells.length - 1, 0, cellObj);
+                                }
+                                weekObj.trs.push(trObj);
                             }
-                        });
-
-                        // Filtering the timeinouts we want into the 2 weeks
-                        const timeInOuts1 = timeInOuts.filter((timeinout) => (timeinout.week === 1));
-                        timeInOuts1.sort(compareTimeInOuts);
-                        const timeInOuts2 = timeInOuts.filter((timeinout) => (timeinout.week === 2));
-                        timeInOuts2.sort(compareTimeInOuts);
-
-                        // Adding the 2 weeks of timeinouts to the timecard object
-                        timecard.timeInOuts1 = timeInOuts1;
-                        timecard.timeInOuts2 = timeInOuts2;
-
-                        // Assigning a timeperiod to the timecard
-                        if (timecard.timeperiod_id === currentTimePeriod.timeperiod_id) {
-                            timecard.period = "current";
-
-                            // Letting the handlebars template know which timecard to display
-                            if (i === 0) {
-                                timecard.isFirst = true;
-                                firstTitleId = timecard.title_id;
-                            }
+                            weeks.push(weekObj)
                         }
 
-                        // Assigning a timeperiod to the timecard
-                        if (timecard.timeperiod_id === previousTimePeriod.timeperiod_id) {
-                            timecard.period = "previous";
-                        }
-
-                        // Assigning a timeperiod to the timecard
-                        if (timecard.timeperiod_id === twoPreviousTimePeriod.timeperiod_id) {
-                            timecard.period = "twoprevious";
-                        }
-
-                        timecard.title = (await Title.findByPk(timecard.title_id)).dataValues.name.replaceAll(" ", "@");
-                        timecard.titlename = timecard.title.replace("@", " ");
-                        timecard.dataid = `${timecard.title}-${timecard.period}`;
-
-                        const startString = (await TimePeriod.findByPk(timecard.timeperiod_id)).dataValues.date_start;
-                        const startObj = DateTime.fromISO(startString);
-                        const endString = DateTime.fromISO(startObj.plus({ days: 13 }).toISODate()).toISODate();
-                        const [endYear, endMonth, endDay] = endString.split("-");
-                        const [startYear, startMonth, startDay] = startString.split("-");
-
-                        timecard.startdate = `${startMonth}/${startDay}/${startYear}`;
-                        timecard.enddate = `${endMonth}/${endDay}/${endYear}`;
-                        for (let i = 1; i <= 13; i++) {
-                            const day = DateTime.fromISO(startObj.plus({ days: i }).toISODate()).toISODate();
-                            const [dayYear, dayMonth, dayDay] = day.split("-");
-                            timecard[`day${i}`] = `${dayMonth}/${dayDay}/${dayYear}`;
-                        }
-                    });
-                    const titles = (await Title.findAll({
-                        where: {
-                            user_id: req.session.user.user_id,
-                        }
-                    })).map((title) => {
                         return {
-                            ...title.dataValues,
-                            dataname: title.dataValues.name.replaceAll(" ", "@"),
+                            weeks,
+                            day0: dates[0],
+                            day13: dates[13],
+                            isFirst,
+                            isApproved: timecard.isApproved,
+                            period_id: timecard.timeperiod_id,
+                            title_id: title.title_id,
+                            titlename: title.name,
+                            timecard_id: timecard.timecard_id,
+                            isReadyToBeApproved: timecard.isReadyToBeApproved,
                         }
-                    });
-                    const firstTitleIndex = titles.findIndex((title) => title.title_id == firstTitleId);
-                    const firstTitle = titles[firstTitleIndex];
-                    titles.splice(firstTitleIndex, 1);
-                    titles.unshift(firstTitle);
+                    }));
 
-                    const isFirstTimeCardReady = allTimeCards[0].isReadyToBeApproved;
+                    let readyStatus = "show";
+                    let unreadyStatus = "hide";
+                    if (isFirstReady) {
+                        readyStatus = "hide";
+                        unreadyStatus = "show";
+                    }
+
                     hbsObj = {
+                        readyStatus,
+                        unreadyStatus,
                         hasTimeCard: true,
-                        userName: req.session.user.name,
                         isAdmin: req.session.user.isAdmin,
                         isSuper: req.session.user.isSuper,
-                        timecards: allTimeCards,
-                        titles,
-                        isFirstTimeCardReady,
+                        timecards,
+                        titles: usableTitles,
+                        periods: usablePeriods,
                     }
                 } else {
                     hbsObj = {
-                        hasTimeCard: false,
-                        userName: req.session.user.name,
                         isAdmin: req.session.user.isAdmin,
                         isSuper: req.session.user.isSuper,
+                        hasTimeCard: false,
                     }
                 }
             } else {
                 hbsObj = {
-                    hasTimeCard: false,
-                    userName: req.session.user.name,
                     isAdmin: req.session.user.isAdmin,
                     isSuper: req.session.user.isSuper,
+                    hasTimeCard: false,
                 }
             }
             res.render("user-timecard", hbsObj);

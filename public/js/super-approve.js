@@ -29,7 +29,12 @@ const readySpan = document.getElementById("span-ready");
 // Keeping track of the selected time card
 let selectedTimeCard = -1;
 
+// Grabbing the view selector
+const viewSelector = document.getElementById("mult-title-select");
+
 const populateTimecard = async (e) => {
+    viewSelector.style.display = "none";
+    setSelectedValue(viewSelector, "Seperate");
     const superviseeId = e.target.getAttribute("data-id");
     const titleId = e.target.getAttribute("data-titleid");
     let timeperiod = "current"
@@ -44,190 +49,166 @@ const populateTimecard = async (e) => {
         timeperiod = e.target.value;
     }
     // Fetching the Data
-    const timecardData = await (await fetch("/api/timecards/timecard-" + timeperiod + "/" + titleId)).json();
-    if (timecardData.isApproved) {
+    const timecardData = await (await fetch("/api/timecards/timecard-" + timeperiod + "/" + superviseeId + "-" + titleId)).json();
+    const selectedTimecard = timecardData.selectedTimeCard;
+    console.log(timecardData);
+    if (selectedTimecard.isApproved) {
         approveBtnEl.setAttribute("class", "approved");
         approveBtnEl.textContent = "Unapprove";
     } else {
         approveBtnEl.setAttribute("class", "unapproved");
         approveBtnEl.textContent = "Approve";
     }
-    if (timecardData.isReadyToBeApproved) {
+    if (selectedTimecard.isReadyToBeApproved) {
         readySpan.textContent = "Time Card Ready";
         readySpan.setAttribute("data-isready", "true");
     } else {
         readySpan.textContent = "Time Card Not Ready";
         readySpan.setAttribute("data-isready", "false");
     }
-    selectedTimeCard = timecardData.timecard_id;
-    const weekOneTimeInOuts = timecardData.TimeInOuts.filter((timeInOut) => (timeInOut.week === 1));
-    const weekTwoTimeInOuts = timecardData.TimeInOuts.filter((timeInOut) => (timeInOut.week === 2));
+    selectedTimeCard = selectedTimecard.timecard_id;
+    const weekOneTimeInOuts = selectedTimecard.TimeInOuts.filter((timeInOut) => (timeInOut.week === 1));
+    const weekTwoTimeInOuts = selectedTimecard.TimeInOuts.filter((timeInOut) => (timeInOut.week === 2));
+    const selectedOffDay = timecardData.selectedTimeCard.OffDay;
 
     // Removing the previous table data
-    const table1Length = weekOneTable.rows.length;
-    for (let i = 1; i < table1Length; i++) {
-        const row = weekOneTable.rows[1];
-        row.remove();
+    const weekTables = [weekOneTable, weekTwoTable];
+    for (let i = 0; i < weekTables.length; i++) {
+        const weekTable = weekTables[i];
+        const tableLength = weekTable.rows.length;
+        for (let j = 0; j < tableLength - 1; j++) {
+            const row = weekTable.rows[1];
+            row.remove();
+        }
     }
-    const table2Length = weekTwoTable.rows.length;
-    for (let i = 1; i < table2Length; i++) {
-        const row = weekTwoTable.rows[1];
-        row.remove();
-    }
 
-    // Setting up the week one table with the data
-    for (let i = 0; i < weekOneTimeInOuts.length; i++) {
-        const timeInOut = weekOneTimeInOuts[i];
-
-        const newRowTimeIn = document.createElement("tr");
-        // Time Ins
-        for (let i = -1; i < week.length + 1; i++) {
-            if (i === -1) {
+    const weekTimeInOuts = [weekOneTimeInOuts, weekTwoTimeInOuts];
+    const tables = [weekOneTable, weekTwoTable];
+    for (let i = 0; i < weekTimeInOuts.length; i++) {
+        const weekTimeInOut = weekTimeInOuts[i];
+        
+        for (let l = 0; l < weekTimeInOut.length; l++) {
+            const timeInOut = weekTimeInOut[l];
+            
+            const tr1 = document.createElement("tr");
+            const tr2 = document.createElement("tr");
+            const newRowTimes = [tr1, tr2];
+            const timeLabels = ["Time In", "Time Out"];
+            const inout = ["in", "out"];
+            
+            for (let j = 0; j < newRowTimes.length; j++) {
+                const newRowTime = newRowTimes[j];
+                
+                const timeLabelCell = document.createElement("td");
+                timeLabelCell.textContent = timeLabels[j];
+                newRowTime.appendChild(timeLabelCell);
+                
+                for (let k = 0; k < week.length; k++) {
+                    const day = `${week[k]}_${inout[j]}`;
+                    
+                    const newCell = document.createElement("td");
+                    newCell.setAttribute("class", `week-${i + 1}-time`);
+                    newCell.textContent = timeInOut[day];
+                    newRowTime.appendChild(newCell);
+                }
+                
                 const newCell = document.createElement("td");
-                newCell.textContent = "Time In";
-                newRowTimeIn.appendChild(newCell);
-            } else if (i === week.length) {
-                const newCell = document.createElement("td");
-                newRowTimeIn.appendChild(newCell);
-            } else {
-                const day = week[i] + "_in";
-                const dayMilitaryValue = timeInOut[day]
-
-                const newCell = document.createElement("td");
-                newCell.setAttribute("data-military", dayMilitaryValue);
-                newCell.setAttribute("class", "week-one-time")
-                newCell.textContent = dayMilitaryValue;
-                newRowTimeIn.appendChild(newCell);
+                newRowTime.appendChild(newCell);
+                tables[i].appendChild(newRowTime);
             }
         }
 
-        const newRowTimeOut = document.createElement("tr");
-        // Time Outs
-        for (let i = -1; i < week.length + 1; i++) {
-            if (i === -1) {
+        for (let j = 0; j < 2; j++) {
+            const extraRow = ["vacation", "sick"][j];
+            const newRow = document.createElement("tr");
+            const labelCell = document.createElement("td");
+            labelCell.textContent = extraRow.charAt(0).toUpperCase() + extraRow.slice(1);
+            newRow.appendChild(labelCell);
+            for (let k = 0; k < week.length; k++) {
+                const day = week[k];
                 const newCell = document.createElement("td");
-                newCell.textContent = "Time Out";
-                newRowTimeOut.appendChild(newCell);
-            } else if (i === week.length) {
-                const newCell = document.createElement("td");
-                newRowTimeOut.appendChild(newCell);
-            } else {
-                const day = week[i] + "_out";
-                const dayMilitaryValue = timeInOut[day]
-
-                const newCell = document.createElement("td");
-                newCell.setAttribute("data-military", dayMilitaryValue);
-                newCell.setAttribute("class", "week-one-time")
-                newCell.textContent = dayMilitaryValue;
-                newRowTimeOut.appendChild(newCell);
+                newCell.setAttribute("class", `${extraRow}-cell-${i + 1}`);
+                newCell.textContent = selectedOffDay[`${day}_${extraRow}_${i + 1}`];
+                newRow.appendChild(newCell);
             }
+            const totalCell = document.createElement("td");
+            totalCell.id = `${extraRow}-total-${i + 1}`;
+            newRow.appendChild(totalCell);
+            tables[i].appendChild(newRow);
         }
 
-        weekOneTable.appendChild(newRowTimeIn);
-        weekOneTable.appendChild(newRowTimeOut);
-    }
-
-    const totalsRow = document.createElement("tr");
-    for (let i = -1; i < week.length + 1; i++) {
-        const newCell = document.createElement("td");
-        if (i === -1) {
-            newCell.textContent = "Daily Total";
-        } else if (i === week.length) {
-            newCell.setAttribute("id", "week-one-total");
-        } else {
-            const day = week[i];
-            newCell.setAttribute("id", day + "-one-total");
+        const overtimeRow = document.createElement("tr");
+        const overtimeCell = document.createElement("td");
+        overtimeCell.textContent = "Overtime";
+        overtimeRow.appendChild(overtimeCell);
+        for (let j = 0; j < week.length; j++) {
+            const day = week[j];
+            const newCell = document.createElement("td");
+            newCell.setAttribute("class", `overtime-cell-${i + 1}`);
+            newCell.id = `${day}-overtime-${i + 1}`;
+            overtimeRow.appendChild(newCell);
         }
-        totalsRow.appendChild(newCell);
-    }
-    weekOneTable.appendChild(totalsRow);
+        const overtimeTotalCell = document.createElement("td");
+        overtimeTotalCell.id = `overtime-total-${i + 1}`;
+        overtimeRow.appendChild(overtimeTotalCell);
+        tables[i].appendChild(overtimeRow);
 
-    // Setting up the week two table with the data
-    for (let i = 0; i < weekTwoTimeInOuts.length; i++) {
-        const timeInOut = weekTwoTimeInOuts[i];
-
-        const newRowTimeIn = document.createElement("tr");
-        // Time Ins
-        for (let i = -1; i < week.length + 1; i++) {
-            if (i === -1) {
-                const newCell = document.createElement("td");
-                newCell.textContent = "Time In";
-                newRowTimeIn.appendChild(newCell);
-            } else if (i === week.length) {
-                const newCell = document.createElement("td");
-                newRowTimeIn.appendChild(newCell);
+        const totalsRow = document.createElement("tr");
+        for (let j = -1; j < week.length + 1; j++) {
+            const newCell = document.createElement("td");
+            if (j === -1) {
+                newCell.textContent = "Daily Total";
+            } else if (j === week.length) {
+                newCell.setAttribute("id", `week-${i + 1}-total`);
             } else {
-                const day = week[i] + "_in";
-                const dayMilitaryValue = timeInOut[day]
-
-                const newCell = document.createElement("td");
-                newCell.setAttribute("data-military", dayMilitaryValue);
-                newCell.setAttribute("class", "week-two-time")
-                newCell.textContent = dayMilitaryValue;
-                newRowTimeIn.appendChild(newCell);
+                const day = week[j];
+                newCell.setAttribute("id", `${day}-${i + 1}-total`);
             }
+            totalsRow.appendChild(newCell);
         }
+        tables[i].appendChild(totalsRow);
 
-        const newRowTimeOut = document.createElement("tr");
-        // Time Outs
-        for (let i = -1; i < week.length + 1; i++) {
-            if (i === -1) {
-                const newCell = document.createElement("td");
-                newCell.textContent = "Time Out";
-                newRowTimeOut.appendChild(newCell);
-            } else if (i === week.length) {
-                const newCell = document.createElement("td");
-                newRowTimeOut.appendChild(newCell);
-            } else {
-                const day = week[i] + "_out";
-                const dayMilitaryValue = timeInOut[day]
-
-                const newCell = document.createElement("td");
-                newCell.setAttribute("data-military", dayMilitaryValue);
-                newCell.setAttribute("class", "week-two-time")
-                newCell.textContent = dayMilitaryValue;
-                newRowTimeOut.appendChild(newCell);
-            }
+        // checking to see if there are other timecards and if so then displaying them underneath the other tables
+        if (timecardData.otherTimecards.length > 0) {
+            // Turn on the view selector
+            viewSelector.style.display = "inline";
         }
-
-        weekTwoTable.appendChild(newRowTimeIn);
-        weekTwoTable.appendChild(newRowTimeOut);
     }
 
-    const totalsRowTwo = document.createElement("tr");
-    for (let i = -1; i < week.length + 1; i++) {
-        const newCell = document.createElement("td");
-        if (i === -1) {
-            newCell.textContent = "Daily Total";
-        } else if (i === week.length) {
-            newCell.setAttribute("id", "week-two-total");
-        } else {
-            const day = week[i];
-            newCell.setAttribute("id", day + "-two-total");
+    const timeCellsArr = [
+        {
+            timeCells: document.getElementsByClassName("week-1-time"),
+            vacationCells: document.getElementsByClassName("vacation-cell-1"),
+            sickCells: document.getElementsByClassName("sick-cell-1"),
+        },
+        {
+            timeCells: document.getElementsByClassName("week-2-time"),
+            vacationCells: document.getElementsByClassName("vacation-cell-2"),
+            sickCells: document.getElementsByClassName("sick-cell-2"),
         }
-        totalsRowTwo.appendChild(newCell);
-    }
-    weekTwoTable.appendChild(totalsRowTwo);
+    ]
 
-    const timeCells1 = document.getElementsByClassName("week-one-time");
-    const details1 = processTimeCard(timeCells1);
-    for (let i = 0; i < week.length; i++) {
-        const day = week[i];
-        const dayTotal = document.getElementById(day + "-one-total");
-        dayTotal.textContent = details1.dailyTotals[i];
+    for (let i = 0; i < timeCellsArr.length; i++) {
+        const timeCells = timeCellsArr[i].timeCells;
+        const vacationCells = timeCellsArr[i].vacationCells;
+        const sickCells = timeCellsArr[i].sickCells;
+        const details = processTimeCard(timeCells, vacationCells, sickCells);
+        for (let j = 0; j < week.length; j++) {
+            const day = week[j];
+            const overtimeCell = document.getElementById(`${day}-overtime-${i + 1}`);
+            overtimeCell.textContent = details.dailyOvertimes[j];
+            const dayTotal = document.getElementById(`${day}-${i + 1}-total`);
+            dayTotal.textContent = details.dailyTotals[j];
+        }
+        const vacationTotal = document.getElementById(`vacation-total-${i + 1}`);
+        vacationTotal.textContent = details.vacation;
+        const sickTotal = document.getElementById(`sick-total-${i + 1}`);
+        sickTotal.textContent = details.sick;
+        const overtimeTotal = document.getElementById(`overtime-total-${i + 1}`);
+        overtimeTotal.textContent = details.weeklyOvertime;
+        const weeklyTotal = document.getElementById(`week-${i + 1}-total`);
+        weeklyTotal.textContent = details.weeklyTotal;
     }
-    const weeklyTotal = document.getElementById("week-one-total");
-    weeklyTotal.textContent = details1.weeklyTotal;
-
-    const timeCells2 = document.getElementsByClassName("week-two-time");
-    const details2 = processTimeCard(timeCells2);
-    for (let i = 0; i < week.length; i++) {
-        const day = week[i];
-        const dayTotal = document.getElementById(day + "-two-total");
-        dayTotal.textContent = details2.dailyTotals[i];
-    }
-    const weekly2Total = document.getElementById("week-two-total");
-    weekly2Total.textContent = details2.weeklyTotal;
 }
 
 for (let i = 0; i < superviseeLis.length; i++) {
@@ -270,7 +251,7 @@ const approveTimeCard = async (e) => {
                 }
             } else {
                 // display message something went wrong
-                console.log("yikes");
+                displayMessage("Something went wrong!");
             }
         } else {
             if (window.confirm("The Time Card you are trying to approve has not been marked as ready. Once you approve this time card, it will lock and not be editable in the future.\nDo you wish to proceed?")) {
@@ -302,7 +283,7 @@ const approveTimeCard = async (e) => {
                     }
                 } else {
                     // display message something went wrong
-                    console.log("yikes");
+                    displayMessage("Something went wrong!");
                 }
             }
         }
