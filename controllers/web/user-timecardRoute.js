@@ -27,18 +27,19 @@ router.get("/", async (req, res) => {
 
             // Checking to see if time periods have been initialized
             if (timeperiodRaw !== null) {
-
+                
                 // Creating date objects
                 const startDateObj = DateTime.fromISO(timeperiod.date_start);
-                const endDateObj = DateTime.fromISO(startDateObj.plus({ days: 14 }).toISODate());
+                const endDateObj = DateTime.fromISO(startDateObj.plus({ days: 13 }).toISODate());
                 const newStartDate = endDateObj.plus({ days: 1 }).toISODate();
                 const nowDateObj = DateTime.now();
-
                 // Grabbing all the titles for use in the next if
                 const titles = (await Title.findAll()).map((title) => title.dataValues);
-
+                
                 // Comparing the end of the current time period with todays date
+                let newTimeperiods = false;
                 if (endDateObj.startOf("day") < nowDateObj.startOf("day")) {
+                    newTimeperiods = true;
 
                     // If we need a new time period, update the old time periods and make a new one
 
@@ -80,9 +81,18 @@ router.get("/", async (req, res) => {
                     // Creating a new set of timecards for each user for the new timeperiod
 
                     // Looping over each title and creating a new timecard
-                    titles.forEach(async (title) => {
-                        createTimecard(newTimeperiod.timeperiod_id, title.user_id, title.title_id);
-                    });
+                    for (let i = 0; i < titles.length; i++) {
+                        const title = titles[i];
+                        await createTimecard(newTimeperiod.timeperiod_id, title.user_id, title.title_id);
+                    }
+                }
+
+                if (newTimeperiods) {
+                    timeperiod = (await TimePeriod.findOne({
+                        where: {
+                            isCurrent: true,
+                        }
+                    })).dataValues;
                 }
 
                 // END OF CHECKING FOR NEW TIME PERIODS
@@ -143,9 +153,9 @@ router.get("/", async (req, res) => {
                         const endDate = startDateObj.plus({ days: 13 }).toISODate();
                         const [startYear, startMonth, startDay] = startDate.split("-");
                         const [endYear, endMonth, endDay] = endDate.split("-");
-                        let periodIdentifier = "Current";
+                        let periodIdentifier = "Current Period";
                         if (period.isPrevious) {
-                            periodIdentifier = "Previous";
+                            periodIdentifier = "Previous Period";
                         } else if (period.isTwoPrevious) {
                             periodIdentifier = "Two Periods Ago"
                         }

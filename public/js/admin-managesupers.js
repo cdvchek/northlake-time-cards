@@ -106,6 +106,19 @@ const manageUsers = async (e) => {
     const readSupervisees = [];
     const readUsers = [];
     users.forEach((user) => {
+        // determine if the user has a supervisor already
+        let hasSuper = false;
+        let selectedTitle;
+        for (let k = 0; k < user.Titles.length; k++) {
+            const title = user.Titles[k];
+            if (user.titleId === title.title_id) {
+                selectedTitle = title;
+            }
+        }
+        if (selectedTitle.supervisor_id !== null) {
+            hasSuper = true;
+        }
+
         let isSupervisee = false;
         for (let i = 0; i < superviseesArray.length; i++) {
             const superviseeId = Number(superviseesArray[i].split("-")[0]);
@@ -115,10 +128,10 @@ const manageUsers = async (e) => {
                     isSupervisee = true;
                 }
             }
-        };
+        };   
         if (isSupervisee) {
             readSupervisees.push(user);
-        } else {
+        } else if (!hasSuper) {
             readUsers.push(user);
         }
     });

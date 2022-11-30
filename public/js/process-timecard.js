@@ -1,4 +1,28 @@
 const processTimeCard = (timeCells, vacationTimeCells, sickTimeCells, type = "cell") => {
+    const sickValues = [];
+    for (let i = 0; i < sickTimeCells.length; i++) {
+        const cell = sickTimeCells[i];
+        let value;
+        if (type === "input") {
+            value = Number(cell.value);
+        } else {
+            value = Number(cell.innerText);
+        }
+        sickValues.push(value);
+    }
+
+    const vacationValues = [];
+    for (let i = 0; i < vacationTimeCells.length; i++) {
+        const cell = vacationTimeCells[i];
+        let value;
+        if (type === "input") {
+            value = Number(cell.value);
+        } else {
+            value = Number(cell.innerText);
+        }
+        vacationValues.push(value);
+    }
+
     // Declaring Variables
     let timesheet = [];
     const weeklyOffset = 7 // 7 days in a week
@@ -78,13 +102,24 @@ const processTimeCard = (timeCells, vacationTimeCells, sickTimeCells, type = "ce
 
     // Setting dailyOvertimes and weeklyOvertime
     let overtimeTotal = 0;
+    let dailyTotal = 0;
     for (let i = 0; i < details.dailyTotals.length; i++) {
-        const total = details.dailyTotals[i];
-        if (total > 8) {
-            const overtime = total - 8;
-            details.dailyOvertimes[i] = overtime;
-            overtimeTotal = overtimeTotal + overtime;
+        const dayTotal = details.dailyTotals[i] - (sickValues[i] + vacationValues[i]);
+        console.log("testing: ", details.dailyTotals[i], " - (", sickValues[i], " + ", vacationValues[i], " ) = ", dayTotal);
+        dailyTotal = dailyTotal + dayTotal;
+        if (dailyTotal > 40) {
+            details.dailyOvertimes[i] = dailyTotal - 40 - overtimeTotal;
+            overtimeTotal = overtimeTotal + details.dailyOvertimes[i];
+        } else {
+            details.dailyOvertimes[i] = 0;
         }
+        if (i === 0) {
+            console.log("--------------------");
+        }
+        console.log("sick: ", sickValues[i]);
+        console.log("vacation: ", vacationValues[i]);
+        console.log("dayTotal: ", dayTotal);
+        console.log("dailyTotal: ", dailyTotal);
     }
     details.weeklyOvertime = overtimeTotal;
 

@@ -6,8 +6,16 @@
 
 #options-div {
     position: absolute;
+    display: flex;
+    justify-content: space-between;
     right: calc(40px + 25%);
-    top: 75px;
+    top: 70px;
+    width: 70%;
+    height: 70px;
+}
+
+.timecard-label {
+    margin: 5px 0 0 10px;
 }
 
 #approve-btn {
@@ -20,10 +28,21 @@
 }
 
 #timecard {
-    height: calc(100% - 120px);
-    max-height: 30vh;
-    display: inline;
+    height: 80vh;
+}
+
+#tables-over {
+    margin-top: 90px;
+    height: calc(100vh - 150px);
     overflow-y: scroll;
+}
+
+#tables > h3 {
+    margin: 10px 0 0 25px;
+}
+
+#other-timecards > h3 {
+    margin: 10px 0 0 25px;
 }
 
 #empl-list {
@@ -35,6 +54,7 @@
     height: calc(100% - 80px);
     border: 1px solid;
     box-shadow: 0 0 15px grey;
+    overflow-y: scroll;
 }
 
 #empl-list>ul>li {
@@ -48,17 +68,14 @@
 }
 
 table {
-    margin-top: 40px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     margin-left: 2.375%;
     background-color: white;
     border-collapse: collapse;
     width: 70%;
     box-shadow: 0 0 15px grey;
     display: inline-table;
-}
-
-table:first-of-type {
-    margin-top: 90px;
 }
 
 table,

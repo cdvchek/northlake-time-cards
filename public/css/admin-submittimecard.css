@@ -2,4 +2,57 @@
     width: 100vw;
     height: 100vh;
     background-color: gainsboro;
+    overflow-y: scroll;
+
+}
+
+.container {
+    width: 100%;
+}
+
+.dropdown {
+    border: 1px solid black;
+    width: 90%;
+    margin: auto;
+    padding-left: 25px;
+}
+
+.timecards-section {
+    display: none;
+    width: 90%;
+    margin: auto;
+    padding-left: 25px;
+}
+
+.timecards-section > div > h4 {
+    margin-left: 25px;
+    margin-top: 0;
+}
+
+.timecard-display {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    border: 1px solid black;
+    margin: 10px 50px;
+    padding-left: 20px;
+}
+
+.active {
+    background-color: rgb(102, 152, 102);
+}
+
+.user-identification-span {
+    position: absolute;
+    left: 100px;
+}
+
+.user-title-span {
+    position: absolute;
+    left: 400px;
+}
+
+.user-supervisor-span {
+    position: absolute;
+    left: 650px;
 }

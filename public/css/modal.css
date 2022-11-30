@@ -26,9 +26,10 @@
 /* Modal Content/Box */
 .modal-content {
     background-color: #fefefe;
-    padding: 20px;
+    padding: 0;
     border: 1px solid #888;
-    height: 80%;
+    max-height: 85%;
+    overflow-y: scroll;
     width: 80%;
     /* Could be more or less, depending on screen size */
 }
@@ -85,8 +86,7 @@
 }
 
 table {
-    margin-top: 40px;
-    margin-left: 2.375%;
+    margin: 20px 0 20px 2.375%;
     background-color: white;
     border-collapse: collapse;
     width: 95%;
@@ -97,4 +97,8 @@ table,
 th,
 td {
     border: 1px solid;
+}
+
+.pdf-button {
+    margin-right: 20px;
 }

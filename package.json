@@ -25,6 +25,7 @@
     "express-session": "^1.17.3",
     "luxon": "^3.0.4",
     "mysql2": "^2.3.3",
+    "pdfmake": "^0.2.6",
     "sequelize": "^6.25.3"
   }
 }

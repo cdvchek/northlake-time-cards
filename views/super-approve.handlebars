@@ -2,67 +2,124 @@
 <div id="background">
     {{> navbar}}
     <div id="options-div">
-        <select name="view" id="mult-title-select" style="display:none">
-            <option value="seperate">Seperate</option>
-            <option value="combined">Combined</option>
-        </select>
-        <span id="span-ready">---- ---- ----</span>
-        <select name="week" id="week-choice">
-            <option value="current">Current Period</option>
-            <option value="previous">Last Period</option>
-            <option value="twoprevious">Two Periods Ago</option>
-        </select>
-        <button id="approve-btn" class="unapproved">Approve</button>
+        <div>
+            <h2 class="timecard-label" id="period-name">--/--/---- - --/--/----</h2>
+            <h2 class="timecard-label" id="title-name">---- ----</h2>
+        </div>
+        <div>
+            <select name="view" id="mult-title-select" style="display:none">
+                <option value="seperate">Seperate</option>
+                <option value="combined">Combined</option>
+            </select>
+            <select name="week" id="week-choice"
+            data-current={{currentPeriod}}
+            data-previous={{previousPeriod}}
+            data-twoprevious={{twoPreviousPeriod}}
+            data-currentsunday1={{current_sunday_1}}
+            data-currentmonday1={{current_monday_1}}
+            data-currenttuesday1={{current_tuesday_1}}
+            data-currentwednesday1={{current_wednesday_1}}
+            data-currentthursday1={{current_thursday_1}}
+            data-currentfriday1={{current_friday_1}}
+            data-currentsaturday1={{current_saturday_1}}
+            data-currentsunday2={{current_sunday_2}}
+            data-currentmonday2={{current_monday_2}}
+            data-currenttuesday2={{current_tuesday_2}}
+            data-currentwednesday2={{current_wednesday_2}}
+            data-currentthursday2={{current_thursday_2}}
+            data-currentfriday2={{current_friday_2}}
+            data-currentsaturday2={{current_saturday_2}}
+            data-previoussunday1={{previous_sunday_1}}
+            data-previousmonday1={{previous_monday_1}}
+            data-previoustuesday1={{previous_tuesday_1}}
+            data-previouswednesday1={{previous_wednesday_1}}
+            data-previousthursday1={{previous_thursday_1}}
+            data-previousfriday1={{previous_friday_1}}
+            data-previoussaturday1={{previous_saturday_1}}
+            data-previoussunday2={{previous_sunday_2}}
+            data-previousmonday2={{previous_monday_2}}
+            data-previoustuesday2={{previous_tuesday_2}}
+            data-previouswednesday2={{previous_wednesday_2}}
+            data-previousthursday2={{previous_thursday_2}}
+            data-previousfriday2={{previous_friday_2}}
+            data-previoussaturday2={{previous_saturday_2}}
+            data-twoprevioussunday1={{twoprevious_sunday_1}}
+            data-twopreviousmonday1={{twoprevious_monday_1}}
+            data-twoprevioustuesday1={{twoprevious_tuesday_1}}
+            data-twopreviouswednesday1={{twoprevious_wednesday_1}}
+            data-twopreviousthursday1={{twoprevious_thursday_1}}
+            data-twopreviousfriday1={{twoprevious_friday_1}}
+            data-twoprevioussaturday1={{twoprevious_saturday_1}}
+            data-twoprevioussunday2={{twoprevious_sunday_2}}
+            data-twopreviousmonday2={{twoprevious_monday_2}}
+            data-twoprevioustuesday2={{twoprevious_tuesday_2}}
+            data-twopreviouswednesday2={{twoprevious_wednesday_2}}
+            data-twopreviousthursday2={{twoprevious_thursday_2}}
+            data-twopreviousfriday2={{twoprevious_friday_2}}
+            data-twoprevioussaturday2={{twoprevious_saturday_2}}>
+                <option value="current">{{currentPeriodLong}} | Current Period</option>
+                <option value="previous">{{previousPeriodLong}} | Previous Period</option>
+                <option value="twoprevious">{{twoPreviousPeriodLong}} | Two Periods Ago</option>
+            </select>
+            <span id="span-ready">---- ---- ----</span>
+            <button id="approve-btn" class="unapproved">Approve</button>
+        </div>
     </div>
     <div id="timecard">
-        <table id="week1">
-            <tr>
-                <th class="th-left">Week 1</th>
-                <th class="th-day">Sunday</th>
-                <th class="th-day">Monday</th>
-                <th class="th-day">Tuesday</th>
-                <th class="th-day">Wednesday</th>
-                <th class="th-day">Thursday</th>
-                <th class="th-day">Friday</th>
-                <th class="th-day">Saturday</th>
-                <th id="th-weekly">Weekly Total</th>
-            </tr>
-            <tr>
-                <td>Daily Total</td>
-                <td></td>
-                <td id="1-total"></td>
-                <td id="2-total"></td>
-                <td id="3-total"></td>
-                <td id="4-total"></td>
-                <td id="5-total"></td>
-                <td id="6-total"></td>
-                <td></td>
-            </tr>
-        </table>
-        <table id="week2">
-            <tr>
-                <th class="th-left">Week 2</th>
-                <th class="th-day">Sunday</th>
-                <th class="th-day">Monday</th>
-                <th class="th-day">Tuesday</th>
-                <th class="th-day">Wednesday</th>
-                <th class="th-day">Thursday</th>
-                <th class="th-day">Friday</th>
-                <th class="th-day">Saturday</th>
-                <th id="th-weekly">Weekly Total</th>
-            </tr>
-            <tr>
-                <td>Daily Total</td>
-                <td></td>
-                <td id="1-total-2"></td>
-                <td id="2-total-2"></td>
-                <td id="3-total-2"></td>
-                <td id="4-total-2"></td>
-                <td id="5-total-2"></td>
-                <td id="6-total-2"></td>
-                <td id="7-total-2"></td>
-            </tr>
-        </table>
+        <div id="tables-over">
+            <div id="tables">
+                <h3 id="title-name-timecard"></h3>
+                <table id="week1">
+                    <tr id="header-week1">
+                        <th class="th-left">Week 1</th>
+                        <th class="th-day">Sunday</th>
+                        <th class="th-day">Monday</th>
+                        <th class="th-day">Tuesday</th>
+                        <th class="th-day">Wednesday</th>
+                        <th class="th-day">Thursday</th>
+                        <th class="th-day">Friday</th>
+                        <th class="th-day">Saturday</th>
+                        <th id="th-weekly">Weekly Total</th>
+                    </tr>
+                    <tr>
+                        <td>Daily Total</td>
+                        <td></td>
+                        <td id="1-total"></td>
+                        <td id="2-total"></td>
+                        <td id="3-total"></td>
+                        <td id="4-total"></td>
+                        <td id="5-total"></td>
+                        <td id="6-total"></td>
+                        <td></td>
+                    </tr>
+                </table>
+                <table id="week2">
+                    <tr id="header-week2">
+                        <th class="th-left">Week 2</th>
+                        <th class="th-day">Sunday</th>
+                        <th class="th-day">Monday</th>
+                        <th class="th-day">Tuesday</th>
+                        <th class="th-day">Wednesday</th>
+                        <th class="th-day">Thursday</th>
+                        <th class="th-day">Friday</th>
+                        <th class="th-day">Saturday</th>
+                        <th id="th-weekly">Weekly Total</th>
+                    </tr>
+                    <tr>
+                        <td>Daily Total</td>
+                        <td></td>
+                        <td id="1-total-2"></td>
+                        <td id="2-total-2"></td>
+                        <td id="3-total-2"></td>
+                        <td id="4-total-2"></td>
+                        <td id="5-total-2"></td>
+                        <td id="6-total-2"></td>
+                        <td id="7-total-2"></td>
+                    </tr>
+                </table>
+                <div id="other-timecards"></div>
+            </div>
+        </div>
         <div id="empl-list">
             <ul>
                 {{#each supervisees}}

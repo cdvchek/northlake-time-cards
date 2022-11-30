@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { TimeCard, TimeInOut, TimePeriod, Title, OffDay } = require('../../models');
+const { DateTime } = require('luxon');
 
 // API Get Time Card by timecard ID
 router.get("/:id", async (req, res) => {
     try {
         if (req.session.user && req.session.user.isAdmin) {
-            const timecard = await TimeCard.findByPk(req.params.id, { include: TimeInOut });
+            const timecard = await TimeCard.findByPk(req.params.id, { include: [TimeInOut, OffDay] });
             res.json(timecard);
         } else {
             res.status(401).json({ msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
@@ -17,20 +18,22 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-const getTimecards = (period) => {
-
-}
-
 // API Get Current Time Card by user ID
-router.get("/timecard-current/:combo", async (req, res) => {
+router.get("/timecard-period/:combo", async (req, res) => {
     try {
         if (req.session.user && req.session.user.isSuper) {
+            const [userId, titleId, period] = req.params.combo.split("-");
+            let whereObj = {};
+            if (period === "current") {
+                whereObj.isCurrent = true;
+            } else if (period === "previous") {
+                whereObj.isPrevious = true;
+            } else {
+                whereObj.isTwoPrevious = true;
+            }
             const currentTimePeriodId = (await TimePeriod.findOne({
-                where: {
-                    isCurrent: true,
-                }
+                where: whereObj,
             })).dataValues.timeperiod_id;
-            const [userId, titleId] = req.params.combo.split("-");
             const timecards = (await TimeCard.findAll({
                 where: {
                     user_id: userId,
@@ -39,47 +42,10 @@ router.get("/timecard-current/:combo", async (req, res) => {
                 include: [TimeInOut, OffDay],
             })).map((timecard) => timecard.dataValues);
 
-            let selectedTimeCard;
-            let otherTimecards;
             for (let i = 0; i < timecards.length; i++) {
                 const timecard = timecards[i];
-                if (timecard.title_id === Number(titleId)) {
-                    selectedTimeCard = timecard;
-                    otherTimecards = timecards.splice(i, 1);
-                }
+                timecard.titleName = (await Title.findByPk(timecard.title_id)).dataValues.name;
             }
-
-            const responseObj = {
-                selectedTimeCard,
-                otherTimecards
-            }
-            res.json(responseObj);
-        } else {
-            res.status(401).json({ msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
-        }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json(err);
-    }
-});
-
-// API Get Previous Time Card by user ID
-router.get("/timecard-previous/:combo", async (req, res) => {
-    try {
-        if (req.session.user && req.session.user.isSuper) {
-            const previousTimePeriodId = (await TimePeriod.findOne({
-                where: {
-                    isPrevious: true,
-                }
-            })).dataValues.timeperiod_id;
-            const [userId, titleId] = req.params.combo.split("-");
-            const timecards = (await TimeCard.findAll({
-                where: {
-                    user_id: userId,
-                    timeperiod_id: previousTimePeriodId,
-                },
-                include: [TimeInOut, OffDay],
-            })).map((timecard) => timecard.dataValues);
 
             let selectedTimeCard;
             let otherTimecards;
@@ -87,49 +53,8 @@ router.get("/timecard-previous/:combo", async (req, res) => {
                 const timecard = timecards[i];
                 if (timecard.title_id === Number(titleId)) {
                     selectedTimeCard = timecard;
-                    otherTimecards = timecards.splice(i, 1);
-                }
-            }
-
-            const responseObj = {
-                selectedTimeCard,
-                otherTimecards
-            }
-            res.json(responseObj);
-        } else {
-            res.status(401).json({ msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
-        }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json(err);
-    }
-});
-
-// API Get Two Previous Time Card by user ID
-router.get("/timecard-twoprevious/:combo", async (req, res) => {
-    try {
-        if (req.session.user && req.session.user.isSuper) {
-            const twoPreviousTimePeriodId = (await TimePeriod.findOne({
-                where: {
-                    isTwoPrevious: true,
-                }
-            })).dataValues.timeperiod_id;
-            const [userId, titleId] = req.params.combo.split("-");
-            const timecards = (await TimeCard.findAll({
-                where: {
-                    user_id: userId,
-                    timeperiod_id: twoPreviousTimePeriodId,
-                },
-                include: [TimeInOut, OffDay],
-            })).map((timecard) => timecard.dataValues);
-
-            let selectedTimeCard;
-            let otherTimecards;
-            for (let i = 0; i < timecards.length; i++) {
-                const timecard = timecards[i];
-                if (timecard.title_id === Number(titleId)) {
-                    selectedTimeCard = timecard;
-                    otherTimecards = timecards.splice(i, 1);
+                    timecards.splice(i, 1);
+                    otherTimecards = timecards;
                 }
             }
 

@@ -7,11 +7,6 @@ const modalContent = document.getElementById("modal-content");
 // Get the <span> element that closes the modal
 const closeModalSpan = document.getElementsByClassName("close")[0];
 
-// When the user clicks on the button, open the modal
-// btn.onclick = function () {
-//     modal.style.display = "block";
-// }
-
 // When the user clicks on <span> (x), close the modal
 closeModalSpan.onclick = function () {
     modal.style.display = "none";
@@ -24,19 +19,88 @@ window.onclick = function (event) {
     }
 }
 
-const setupModalTimecards = async (userId) => {
+const generatePdf = (bodies, name, title, period) => {
+    return {
+        content: [
+            {
+                columns: [
+                    {text: `Employee: ${name}`, fontSize: 15, bold: true, margin: [0, 0 , 0, 10]},
+                    {text: `${period}`, fontSize: 15, margin: [0, 0, 0, 10], alignment: "right"}
+                ]
+            },
+            {text: `Title: ${title}`, fontSize: 15, bold: true, margin: [0, 0 , 0, 50]},
+            {
+                layout: 'lightHorizontalLines', // optional
+                table: {
+                    // headers are automatically repeated if the table spans over multiple pages
+                    // you can declare how many rows should be treated as headers
+                    headerRows: 1,
+                    widths: [ 56, 40, 43, 45, 62, 50, 33, 48, 68 ],
+                    body: bodies[0],
+                },
+            },
+            {
+                layout: 'lightHorizontalLines', // optional
+                table: {
+                    // headers are automatically repeated if the table spans over multiple pages
+                    // you can declare how many rows should be treated as headers
+                    headerRows: 1,
+                    widths: [ 56, 40, 43, 45, 62, 50, 33, 48, 68 ],
+                    body: bodies[1],
+                },
+            margin: [0, 40],
+            }
+        ],
+        pageMargins: [10, 40, 10, 40],
+    };
+}
+
+const openPdf = (bodies, name, title, period) => {
+    const docDefinition = generatePdf(bodies, name, title, period);
+
+    createPdf(docDefinition).open();
+}
+
+const downloadPdf = (bodies, name) => {
+    const docDefinition = generatePdf(bodies, name, title, period);
+
+    createPdf(docDefinition).download();
+}
+
+const printPdf = (bodies, name) => {
+    const docDefinition = generatePdf(bodies, name, title, period);
+
+    createPdf(docDefinition).print();
+}
+
+const setupModalTimecards = async (userId, multipleTimecards = true, timecard_id = -1) => {
     const modalContentChildren = modalContent.children;
     const modalContentChildrenLength = modalContentChildren.length;
     for (let i = 0; i < modalContentChildrenLength; i++) {
         modalContentChildren[0].remove();
     }
     const user = await (await fetch('/api/users/user-id/' + userId)).json();
-    const timecards = user.TimeCards;
+    const titles = user.Titles;
+    let periods = await (await fetch('/api/timeperiods/period-dates/')).json();
+    let timecards = user.TimeCards;
+
+    if (!multipleTimecards) {
+        timecards = [await (await fetch('/api/timecards/' + timecard_id)).json()];
+        const timeperiod_id = timecards[0].timeperiod_id;
+        periods = await (await fetch('/api/timeperiods/single-period-dates/' + timeperiod_id)).json();
+    }
 
     const tabsDiv = document.createElement("div");
     tabsDiv.setAttribute("class", "tab");
     for (let i = 0; i < timecards.length; i++) {
         const timecard = timecards[i];
+        let title;
+        for (let j = 0; j < titles.length; j++) {
+            const titleChecking = titles[j];
+            if (titleChecking.title_id === timecard.title_id) {
+                title = titleChecking;
+            }
+        }
         const buttonTab = document.createElement("button");
         let classString = "tablinks";
         if (i === 0) {
@@ -44,13 +108,43 @@ const setupModalTimecards = async (userId) => {
         }
         buttonTab.setAttribute("class", classString);
         buttonTab.setAttribute("onclick", "openTimeCard(event, '" + timecard.timecard_id.toString() + "')");
-        buttonTab.textContent = timecard.timecard_id;
+        let timeperiod;
+        for (let j = 0; j < periods.length; j++) {
+            const period = periods[j];
+            if (timecard.timeperiod_id === period.timeperiod_id) {
+                timeperiod = period;
+            }
+        }
+        buttonTab.innerHTML = `${title.name} <br> ${timeperiod.startDate} - ${timeperiod.endDate}`;
         tabsDiv.appendChild(buttonTab);
     }
     modalContent.appendChild(tabsDiv);
 
+    
     for (let i = 0; i < timecards.length; i++) {
         const timecard = timecards[i];
+        // Setup for the pdf
+        const bodies = [[],[]];
+        const bodyHeader1 = [ "Week 1", 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Weekly Total' ];
+        const bodyHeader2 = [ "Week 2", 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Weekly Total' ];
+        bodies[0].push(bodyHeader1);
+        bodies[1].push(bodyHeader2);
+        let titleName;
+        for (let j = 0; j < titles.length; j++) {
+            const title = titles[j];
+            if (timecard.title_id === title.title_id) {
+                titleName = title.name;
+            }
+        }
+        let periodName;
+        for (let j = 0; j < periods.length; j++) {
+            const period = periods[j];
+            if (timecard.timeperiod_id === period.timeperiod_id) {
+                periodName = `${period.startDate} - ${period.endDate}`;
+            }
+        }
+
+
         const tabcontentDiv = document.createElement("div");
         if (i === 0) {
             tabcontentDiv.style.display = "block";
@@ -61,8 +155,8 @@ const setupModalTimecards = async (userId) => {
         const timeCardTable1 = document.createElement("table");
         const timeCardTable2 = document.createElement("table");
         const timeCardData = await (await fetch("/api/timecards/" + timecard.timecard_id.toString())).json();
+        const offDay = timeCardData.OffDay;
         for (let l = 0; l < 2; l++) { // 2 weeks
-            let timeCells = [];
             // Creating the Headers Row
             const headersRow = document.createElement("tr");
             const topLeftCell = document.createElement("th");
@@ -86,9 +180,11 @@ const setupModalTimecards = async (userId) => {
                 timeCardTable2.appendChild(headersRow);
             }
 
+            const timeCells = [];
             // Creating the time in/out rows
             const weekTimeInOuts = timeCardData.TimeInOuts.filter((timeinout) => (timeinout.week === (l + 1)));
             for (let j = 0; j < weekTimeInOuts.length; j++) {
+                const timeInPdfRow = ["Time In"];
                 const timeInOut = weekTimeInOuts[j];
                 const timeInRow = document.createElement("tr");
                 const timeInCell = document.createElement("td");
@@ -99,12 +195,14 @@ const setupModalTimecards = async (userId) => {
                     const value = timeInOut[day + "_in"];
                     const newCell = document.createElement("td");
                     newCell.textContent = value;
+                    timeInPdfRow.push(value);
                     timeInRow.appendChild(newCell);
                     timeCells.push(newCell);
                 }
                 const timeInWeeklyTotalCell = document.createElement("td");
                 timeInRow.appendChild(timeInWeeklyTotalCell);
 
+                const timeOutPdfRow = ["Time Out"];
                 const timeOutRow = document.createElement("tr");
                 const timeOutCell = document.createElement("td");
                 timeOutCell.textContent = "Time Out";
@@ -114,11 +212,18 @@ const setupModalTimecards = async (userId) => {
                     const value = timeInOut[day + "_out"];
                     const newCell = document.createElement("td");
                     newCell.textContent = value;
+                    timeOutPdfRow.push(value);
                     timeOutRow.appendChild(newCell);
                     timeCells.push(newCell);
                 }
                 const timeOutWeeklyTotalCell = document.createElement("td");
                 timeOutRow.appendChild(timeOutWeeklyTotalCell);
+                timeInPdfRow.push("");
+                timeOutPdfRow.push("");
+
+                bodies[l].push(timeInPdfRow);
+                bodies[l].push(timeOutPdfRow);
+
                 // Appending Headers Row
                 if (l == 0) {
                     timeCardTable1.appendChild(timeInRow);
@@ -128,30 +233,110 @@ const setupModalTimecards = async (userId) => {
                     timeCardTable2.appendChild(timeOutRow);
                 }
             }
-            const details = processTimeCard(timeCells);
 
-            // Creating the totals row
-            const totalsRow = document.createElement("tr");
-            const dailyTotalCell = document.createElement("td");
-            dailyTotalCell.textContent = "Daily Total";
-            totalsRow.appendChild(dailyTotalCell);
-            for (let m = 0; m < week.length; m++) {
-                const dayTotalCell = document.createElement("td");
-                dayTotalCell.textContent = details.dailyTotals[m];
-                totalsRow.appendChild(dayTotalCell);
+            const vacationCells = [];
+            const sickCells = [];
+            let vacationCell;
+            let sickCell;
+            const vacationSickArr = ["vacation", "sick"];
+            // Creating the vacation and sick rows
+            for (let j = 0; j < vacationSickArr.length; j++) {
+                const vacationSick = vacationSickArr[j];
+                const vacationSickCapitalized = vacationSick.charAt(0).toUpperCase() + vacationSick.slice(1);
+                const pdfRow = [vacationSickCapitalized];
+                const newRow = document.createElement("tr");
+                const labelCell = document.createElement("td");
+                labelCell.textContent = vacationSickCapitalized;
+                newRow.appendChild(labelCell);
+                for (let k = 0; k < week.length; k++) {
+                    const day = week[k];
+                    const newCell = document.createElement("td");
+                    newCell.textContent = offDay[`${day}_${vacationSick}_${l + 1}`];
+                    newRow.appendChild(newCell);
+                    pdfRow.push(offDay[`${day}_${vacationSick}_${l + 1}`]);
+                    if (j === 0) {
+                        vacationCells.push(newCell);
+                    } else {
+                        sickCells.push(newCell);
+                    }
+                }
+                if (j === 0) {
+                    vacationCell = document.createElement('td');
+                    newRow.appendChild(vacationCell);
+                } else {
+                    sickCell = document.createElement('td');
+                    newRow.appendChild(sickCell);
+                }
+                if (l === 0) {
+                    timeCardTable1.appendChild(newRow);
+                } else {
+                    timeCardTable2.appendChild(newRow);
+                }
+                bodies[l].push(pdfRow);
             }
-            const weeklyTotalCell = document.createElement("td");
-            weeklyTotalCell.textContent = details.weeklyTotal;
-            totalsRow.appendChild(weeklyTotalCell);
-            if (l === 0) {
-                timeCardTable1.appendChild(totalsRow);
-            } else {
-                timeCardTable2.appendChild(totalsRow);
+
+            const details = processTimeCard(timeCells, vacationCells, sickCells);
+
+            vacationCell.textContent = details.vacation;
+            sickCell.textContent = details.sick;
+            bodies[l][bodies[l].length - 2][8] = details.vacation;
+            bodies[l][bodies[l].length - 1][8] = details.sick;
+
+            const overtimeTotalArr = ["overtime", "total"];
+            // Creating the vacation and sick rows
+            for (let j = 0; j < overtimeTotalArr.length; j++) {
+                const overtimeTotal = overtimeTotalArr[j];
+                const overtimeTotalCapitalized = overtimeTotal.charAt(0).toUpperCase() + overtimeTotal.slice(1);
+                let overtimeTotalPhrase;
+                if (j === 0) {
+                    overtimeTotalPhrase = "Overtime";
+                } else {
+                    overtimeTotalPhrase = "Daily Total"
+                }
+                const pdfRow = [overtimeTotalPhrase];
+                const newRow = document.createElement("tr");
+                const labelCell = document.createElement("td");
+                labelCell.textContent = overtimeTotalPhrase;
+                newRow.appendChild(labelCell);
+                for (let k = 0; k < week.length; k++) {
+                    const newCell = document.createElement("td");
+                    newCell.textContent = details[`daily${overtimeTotalCapitalized}s`][k];
+                    pdfRow.push(details[`daily${overtimeTotalCapitalized}s`][k])
+                    newRow.appendChild(newCell);
+                }
+                const totalCell = document.createElement("td");
+                totalCell.textContent = details[`weekly${overtimeTotalCapitalized}`];
+                pdfRow.push(details[`weekly${overtimeTotalCapitalized}`])
+                newRow.appendChild(totalCell);
+                if (l === 0) {
+                    timeCardTable1.appendChild(newRow);
+                } else {
+                    timeCardTable2.appendChild(newRow);
+                }
+                bodies[l].push(pdfRow);
             }
         }
         tabcontentDiv.appendChild(timeCardTable1);
         tabcontentDiv.appendChild(timeCardTable2);
         modalContent.appendChild(tabcontentDiv);
+
+        const openPdfButton = document.createElement("button");
+        openPdfButton.textContent = "Open Pdf";
+        openPdfButton.setAttribute("onclick", `openPdf(${JSON.stringify(bodies)}, "${user.name}", "${titleName}", "${periodName}")`);
+        openPdfButton.setAttribute("class", "pdf-button");
+        tabcontentDiv.appendChild(openPdfButton);
+
+        const downloadPdfButton = document.createElement("button");
+        downloadPdfButton.textContent = "Download Pdf";
+        downloadPdfButton.setAttribute("onclick", `downloadPdf(${JSON.stringify(bodies)}, "${user.name}", "${titleName}", "${periodName}")`);
+        downloadPdfButton.setAttribute("class", "pdf-button");
+        tabcontentDiv.appendChild(downloadPdfButton);
+
+        const printPdfButton = document.createElement("button");
+        printPdfButton.textContent = "Print Pdf";
+        printPdfButton.setAttribute("onclick", `printPdf(${JSON.stringify(bodies)}, "${user.name}", "${titleName}", "${periodName}")`);
+        printPdfButton.setAttribute("class", "pdf-button");
+        tabcontentDiv.appendChild(printPdfButton);
     }
     modal.style.display = "flex";
 }

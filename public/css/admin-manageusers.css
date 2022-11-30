@@ -15,6 +15,7 @@
     width: 20%;
     box-shadow: 0 0 15px grey;
     margin: 20px;
+    overflow-y: scroll;
 }
 
 #users-list>ul {
