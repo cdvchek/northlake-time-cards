@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const { User, TimeCard, TimeInOut, TimePeriod, Title } = require('../../models');
 const { createTimecard } = require('../../utils');
 
