@@ -5,7 +5,8 @@ const removeTitle = (e) => {
     e.target.parentNode.remove();
 }
 
-const addTitle = () => {
+const addTitle = (e) => {
+    e.preventDefault();
     const newTitleDiv = document.createElement("div");
     newTitleDiv.setAttribute("class", "title");
     const newTitleP = document.createElement("p");

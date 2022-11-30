@@ -1,4 +1,5 @@
 const signupForm = document.getElementById("form-sign-up");
+const signupBtn = document.getElementById("btn-sign-up");
 const nameInpt = document.getElementById("inpt-name");
 const emailInpt = document.getElementById("inpt-empl-id");
 const passwordInpt = document.getElementById("inpt-password");
@@ -47,4 +48,4 @@ const signup = async (e) => {
     }
 }
 
-signupForm.addEventListener("submit", signup);
+signupBtn.addEventListener("click", signup);
