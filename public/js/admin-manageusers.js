@@ -20,11 +20,13 @@ const emailConfirmInpt = document.getElementById("inpt-email-confirm");
 const nameInpt = document.getElementById("inpt-name");
 const nameConfirmInpt = document.getElementById("inpt-name-confirm");
 const viewTimeCardBtn = document.getElementById("btn-view-timecards");
+const createTimeCardsBtn = document.getElementById("btn-create-timecards");
 let oldTitle = [];
 
 const populateProfile = async (e) => {
     const userId = e.target.getAttribute('data-id');
     viewTimeCardBtn.setAttribute("data-id", userId);
+    createTimeCardsBtn.setAttribute("data-id", userId);
     const user = await (await fetch('/api/users/user-id/' + userId)).json();
     const titleChildren = titlesUl.children;
     const titleChildrenLength = titleChildren.length
@@ -439,9 +441,24 @@ const viewTimeCards = async (e) => {
     if (userId !== null) {
         setupModalTimecards(userId);
     } else {
-        // display a message saying that you need to select a user before viewing timecards
+        displayMessage("Please select a user before viewing timecards.");
     }
 
 }
 
 viewTimeCardBtn.addEventListener("click", viewTimeCards);
+
+const createTimeCards = async (e) => {
+    if (window.confirm("You are trying to create timecards for a user. This will delete any timecards this user currently has and create new ones, do you wish to proceed?")) {
+        const userId = e.target.getAttribute("data-id");
+        console.log(userId);
+        
+        if (userId !== null) {
+            const creationResponse = await fetch('/api/timecards/create-new/' + userId);
+        } else {
+            displayMessage("Please select a user before creating timecards.");
+        }
+    }
+}
+
+createTimeCardsBtn.addEventListener("click", createTimeCards);

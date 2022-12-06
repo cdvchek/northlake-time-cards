@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { TimeCard, TimeInOut, TimePeriod, Title, OffDay } = require('../../models');
 const { DateTime } = require('luxon');
+const { createTimecard } = require("../../utils");
 
 // API Get Time Card by timecard ID
 router.get("/:id", async (req, res) => {
@@ -18,7 +19,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-// API Get Current Time Card by user ID
+// API Get Time Card by user ID, title ID, and Period
 router.get("/timecard-period/:combo", async (req, res) => {
     try {
         if (req.session.user && req.session.user.isSuper) {
@@ -63,6 +64,41 @@ router.get("/timecard-period/:combo", async (req, res) => {
                 otherTimecards
             }
             res.json(responseObj);
+        } else {
+            res.status(401).json({ msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
+
+router.get("/create-new/:id", async (req, res) => {
+    try {
+        if (req.session.user && req.session.user.isAdmin) {
+            // find all the timecards
+            const timecards = await TimeCard.findAll({ where: { user_id: req.params.id } });
+            // if there are timecards, delete them
+            if (timecards.length > 0) {
+                for (let i = 0; i < timecards.length; i++) {
+                    const timecard = timecards[i].dataValues;
+                    await TimeCard.destroy({ where: { timecard_id: timecard.timecard_id } });
+                }
+            }
+            // make new timecards
+            const userTitles = await Title.findAll({ where: {user_id: req.params.id } });
+            const currentPeriodId = (await TimePeriod.findOne({ where: { isCurrent: true } })).dataValues.timeperiod_id;
+            const previousPeriodId = (await TimePeriod.findOne({ where: { isPrevious: true } })).dataValues.timeperiod_id;
+            const twoPreviousPeriodId = (await TimePeriod.findOne({ where: { isTwoPrevious: true } })).dataValues.timeperiod_id;
+            const periodIds = [currentPeriodId, previousPeriodId, twoPreviousPeriodId];
+            for (let i = 0; i < periodIds.length; i++) {
+                const periodId = periodIds[i];
+                for (let j = 0; j < userTitles.length; j++) {
+                    const title = userTitles[j].dataValues;
+                    await createTimecard(periodId, req.params.id, title.title_id);
+                }
+            }
+            res.json({ msg: "timecards created" });
         } else {
             res.status(401).json({ msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
         }
@@ -177,10 +213,10 @@ router.put("/timecard-ready/:id", async (req, res) => {
                 });
                 res.json(updatedTimeCard)
             } else {
-                res.status(200).json({ msg: "You cannot manipulate this data", msg_type: "UNAUTHORIZED_DATA_MANIPULATE" });
+                res.status(401).json({ msg: "You cannot manipulate this data", msg_type: "UNAUTHORIZED_DATA_MANIPULATE" });
             }
         } else {
-            res.status(200).json({ msg: "You cannot manipulate this data", msg_type: "UNAUTHORIZED_DATA_MANIPULATE" });
+            res.status(401).json({ msg: "You cannot manipulate this data", msg_type: "UNAUTHORIZED_DATA_MANIPULATE" });
         }
     } catch (err) {
         console.log(err);
