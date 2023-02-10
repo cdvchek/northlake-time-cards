@@ -28,6 +28,9 @@ router.use("/admin-timeperiods", adminTimePeriodsRoute);
 const adminSubmitTimecardRoute = require("./admin-submittimecardRoute");
 router.use("/admin-submittimecard", adminSubmitTimecardRoute);
 
+const userUpdatesRoute = require("./user-updatesRoute");
+router.use("/user-updates", userUpdatesRoute);
+
 const helpRoute = require("./helpRoute");
 router.use("/help", helpRoute);
 

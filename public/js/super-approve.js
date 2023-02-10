@@ -8,7 +8,6 @@ const week = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", 
 function setSelectedValue(selectObj, valueToSet) {
     for (var i = 0; i < selectObj.options.length; i++) {
         if (selectObj.options[i].value == valueToSet) {
-            console.log(selectObj.options);
             selectObj.options[i].selected = true;
             return;
         }
@@ -53,6 +52,11 @@ const populateTimecard = async (e) => {
     let timeperiod = "current"
     let periodNameShort;
     if (e.target.nodeName === "LI") {
+        for (let i = 0; i < superviseeLis.length; i++) {
+            const superviseeLi = superviseeLis[i];
+            superviseeLi.setAttribute('class', 'supervisee');
+        }
+        e.target.setAttribute('class', 'supervisee active');
         selectTimePeriod.setAttribute("data-id", superviseeId);
         selectTimePeriod.setAttribute("data-titleid", titleId);
         setSelectedValue(selectTimePeriod, "current");
@@ -468,3 +472,28 @@ const approveTimeCard = async (e) => {
 }
 
 approveBtnEl.addEventListener("click", approveTimeCard);
+
+const tabsEl = document.getElementsByClassName("tab");
+const ulEls = document.getElementsByClassName("ul");
+
+const showTab = (e) => {
+    for (let i = 0; i < tabsEl.length; i++) {
+        const tab = tabsEl[i];
+        tab.setAttribute("class", "tab");
+    }
+    e.target.setAttribute("class", "tab active-tab");
+
+    for (let i = 0; i < ulEls.length; i++) {
+        const ul = ulEls[i];
+        ul.setAttribute("class", "ul ul-hidden");
+    }
+    const ulId = e.target.getAttribute("data-tab");
+    const ulEl = document.getElementById(ulId);
+
+    ulEl.setAttribute("class", "ul");
+}
+
+for (let i = 0; i < tabsEl.length; i++) {
+    const tab = tabsEl[i];
+    tab.addEventListener("click", showTab);
+}

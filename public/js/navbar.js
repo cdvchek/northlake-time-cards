@@ -16,6 +16,7 @@ const manageUsersBtn = document.getElementById("nav-admin-users");
 const timePeriodsBtn = document.getElementById("nav-admin-timeperiods");
 const submitTimeCardBtn = document.getElementById("nav-admin-submit");
 // const helpBtn = document.getElementById("nav-admin-help");
+const updatesBtn = document.getElementById("nav-user-updates");
 const logoutBtn = document.getElementById("nav-logout");
 
 const goToTimeCard = (e) => {
@@ -53,6 +54,11 @@ const goToSubmitTimeCard = (e) => {
 //     location = "/help/";
 // }
 
+const goToUpdates = (e) => {
+    e.preventDefault();
+    location = "/user-updates/";
+}
+
 const goToLogout = async (e) => {
     e.preventDefault();
     const logout = await fetch("/api/users/logout");
@@ -72,4 +78,5 @@ if (isAdmin) {
     submitTimeCardBtn.addEventListener("click", goToSubmitTimeCard);
 }
 // helpBtn.addEventListener("click", goToHelp);
+updatesBtn.addEventListener("click", goToUpdates);
 logoutBtn.addEventListener("click", goToLogout);

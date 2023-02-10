@@ -100,3 +100,38 @@ td {
 .unapproved {
     background-color: rgb(9, 139, 175);
 }
+
+#tabs-div {
+    text-align: center;
+    height: 40px;
+}
+
+.tab {
+    height: 26px;
+    width: 20%;
+    margin: 7px 10px;
+    border: none;
+    background-color: rgb(9, 139, 175);
+    color: white;
+    cursor: pointer;
+}
+
+.active-tab {
+    border: 3px solid rgb(8, 112, 141);
+}
+
+.ul-hidden {
+    display: none;
+}
+
+.active {
+    background-color: aquamarine;
+}
+
+.li-approved {
+    background-color: rgb(197, 242, 197);
+}
+
+.li-not-approved {
+    background-color: rgb(255, 156, 156);
+}

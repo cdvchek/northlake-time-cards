@@ -105,7 +105,6 @@ const processTimeCard = (timeCells, vacationTimeCells, sickTimeCells, type = "ce
     let dailyTotal = 0;
     for (let i = 0; i < details.dailyTotals.length; i++) {
         const dayTotal = details.dailyTotals[i] - (sickValues[i] + vacationValues[i]);
-        console.log("testing: ", details.dailyTotals[i], " - (", sickValues[i], " + ", vacationValues[i], " ) = ", dayTotal);
         dailyTotal = dailyTotal + dayTotal;
         if (dailyTotal > 40) {
             details.dailyOvertimes[i] = dailyTotal - 40 - overtimeTotal;
@@ -113,13 +112,6 @@ const processTimeCard = (timeCells, vacationTimeCells, sickTimeCells, type = "ce
         } else {
             details.dailyOvertimes[i] = 0;
         }
-        if (i === 0) {
-            console.log("--------------------");
-        }
-        console.log("sick: ", sickValues[i]);
-        console.log("vacation: ", vacationValues[i]);
-        console.log("dayTotal: ", dayTotal);
-        console.log("dailyTotal: ", dailyTotal);
     }
     details.weeklyOvertime = overtimeTotal;
 

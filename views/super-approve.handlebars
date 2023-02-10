@@ -121,13 +121,41 @@
             </div>
         </div>
         <div id="empl-list">
-            <ul>
+            <div id="tabs-div">
+                <button class="tab active-tab" data-tab="all-ul">All</button>
+                <button class="tab" data-tab="ready-ul">Ready</button>
+                <button class="tab" data-tab="checklist">Check</button>
+            </div>
+            <ul id="all-ul" class="ul">
                 {{#each supervisees}}
                 <li class="supervisee" 
                     data-id={{this.user_id}}
                     data-titleid={{this.title_id}}>
                     {{this.titleName}}
                 </li>
+                {{/each}}
+            </ul>
+            <ul id="ready-ul" class="ul ul-hidden">
+                {{#each readysupervisees}}
+                <li class="supervisee"
+                    data-id={{this.user_id}}
+                    data-titleid={{this.title_id}}>
+                    {{this.titleName}}
+                </li>
+                {{/each}}
+            </ul>
+            <ul id="checklist" class="ul ul-hidden">
+                <h3>{{currentPeriodLong}} | Current Period</h3>
+                {{#each superviseesCurrentCheck}}
+                    <li {{#if this.isApproved}}class="li-approved"{{else}}class="li-not-approved"{{/if}}>{{this.name}}</li>
+                {{/each}}
+                <h3>{{previousPeriodLong}} | Previous Period</h3>
+                {{#each superviseesPreviousCheck}}
+                    <li {{#if this.isApproved}}class="li-approved"{{else}}class="li-not-approved"{{/if}}>{{this.name}}</li>
+                {{/each}}
+                <h3>{{twoPreviousPeriodLong}} | Two Periods Ago</h3>
+                {{#each superviseesTwoPreviousCheck}}
+                    <li {{#if this.isApproved}}class="li-approved"{{else}}class="li-not-approved"{{/if}}>{{this.name}}</li>
                 {{/each}}
             </ul>
         </div>

@@ -1,0 +1,18 @@
+#background {
+    width: 100vw;
+    min-height: calc(100vh - 280px);
+    background-color: gainsboro;
+    display: flex;
+    justify-content: center;
+    padding-bottom: 120px;
+    padding-top: 100px;
+}
+
+#white-sheet {
+    box-shadow: 0 0 100px grey;
+    background-color: white;
+    width: 66%;
+    min-width: 295px;
+    max-width: 1080px;
+    padding: 20px 40px 20px 40px;
+}
