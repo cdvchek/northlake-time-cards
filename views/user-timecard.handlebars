@@ -23,9 +23,11 @@
     {{!-- TimeCards --}}
     <div id="timecards-div" data-timecard="true">
         {{#each timecards}}
+        {{!-- TimeCard Div --}}
         <div id="{{this.period_id}}-{{this.title_id}}" data-timecardid={{this.timecard_id}} data-isapproved={{this.isApproved}} data-isready={{this.isReadyToBeApproved}}
             data-titleid={{this.title_id}} data-periodid={{this.period_id}} {{#if this.isFirst}}
             class="shown-timecard timecard" {{else}} class="hidden-timecard timecard" {{/if}}>
+            {{!-- Header above the timecard --}}
             <div class="timecard-header">
                 <div class="timecard-header-h3s">
                     <h3 class="timecard-identifier-h3">{{this.titlename}}</h3>
@@ -37,51 +39,72 @@
                 {{#each this.trs}}
                 <tr {{#if this.isInOut}} class={{this.inout}} {{/if}}>
                     {{#each this.cells}}
-                    <{{this.cellType}} 
+                    <{{this.cellType}}
 
                         {{#if this.id}} 
                             id={{this.idValue}}
                         {{/if}} 
-                        
-                        {{#if this.class}}
-                            class={{this.classValue}}
-                        {{/if}} 
-                        
-                        {{#each this.dataAttributes}}
-                            data-{{this.data}}={{this.dataValue}}
-                        {{/each}}>
 
-                        {{#if this.breaks}}
-                            {{#each this.cellValues}}
-                                {{this.miniValue}} <br>
+                        {{#if this.isSelect}}
+
+                            ><select 
+                            {{#if this.id}}
+                                id="{{this.idValue}}"
+                            {{/if}}
+                            class="{{this.classValue}}"
+                            {{#each this.inputDataAttributes}}
+                                data-{{this.data}}={{this.dataValue}}
                             {{/each}}
-                            {{this.lastValue}}
-                        {{/if}}
+                            >
 
-                        {{#if this.isNotApproved}}
-
-                            {{#if this.isInOut}}
-                                <input 
-                                {{#each this.inputDataAttributes}}
-                                    data-{{this.data}}={{this.dataValue}}
+                                {{#each this.options}}
+                                    <option value="{{this.value}}">{{this.type}}</option>
                                 {{/each}}
-                                class="{{this.classValue}} inout-input" type="time" value={{this.cellValue}}>
+
+                            </select>
+
+                        {{else}}
+
+                            {{#if this.class}}
+                                class={{this.classValue}}
+                            {{/if}} 
+                            
+                            {{#each this.dataAttributes}}
+                                data-{{this.data}}={{this.dataValue}}
+                            {{/each}}>
+
+                            {{#if this.breaks}}
+                                {{#each this.cellValues}}
+                                    {{this.miniValue}} <br>
+                                {{/each}}
+                                {{this.lastValue}}
                             {{/if}}
 
-                            {{#if this.isExtraRow}}
-                                <input
-                                {{#each this.inputDataAttributes}}
-                                    data-{{this.data}}={{this.dataValue}}
-                                {{/each}}
-                                id={{this.idValue}} class="{{this.classValue}} extra-input" type="number" value={{this.cellValue}}>
+                            {{#if this.isNotApproved}}
+
+                                {{#if this.isInOut}}
+                                    <input 
+                                    {{#each this.inputDataAttributes}}
+                                        data-{{this.data}}={{this.dataValue}}
+                                    {{/each}}
+                                    class="{{this.classValue}} inout-input" type="time" value={{this.cellValue}}>
+                                {{/if}}
+
+                                {{#if this.isExtraRow}}
+                                    <input
+                                    {{#each this.inputDataAttributes}}
+                                        data-{{this.data}}={{this.dataValue}}
+                                    {{/each}}
+                                    id={{this.idValue}} class="{{this.classValue}} extra-input" type="number" value={{this.cellValue}} step=".25">
+                                {{/if}}
+
                             {{/if}}
 
+                            {{#if this.justText}}
+                                {{this.cellValue}}
+                            {{/if}}
+                        
                         {{/if}}
-
-                        {{#if this.justText}}
-                            {{this.cellValue}}
-                        {{/if}}
-
                     </{{this.cellType}}>
                     {{/each}}
                 </tr>

@@ -209,7 +209,6 @@ router.get("/", async (req, res) => {
 
                         // Preparing the data for the table
                         const week = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-                        const extraRows = ["vacation", "sick", "overtime", "total"];
 
                         const weeks = [];
                         const isNotApproved = !timecard.isApproved;
@@ -307,6 +306,9 @@ router.get("/", async (req, res) => {
                                     weekObj.trs.push(trObj);
                                 }
                             }
+
+                            const extraRows = ["vacation", "sick", "overtime", "total"];
+                            const ptoTypes = ["None", "Vacation", "Sick", "Holiday", "Sabbatical", "Jury Duty", "Benevolence"];
                             
                             // Vaction, Sick, Overtime, Total Rows
                             const offDay = (await OffDay.findOne({
@@ -316,12 +318,19 @@ router.get("/", async (req, res) => {
                             })).dataValues;
                             for (let j = 0; j < extraRows.length; j++) {
                                 const extraRow = extraRows[j];
-                                const extraRowCapitalized = extraRow.charAt(0).toUpperCase() + extraRow.slice(1);
+                                let extraRowCapitalized; 
+                                if (j === 0) {
+                                    extraRowCapitalized = "PTO Type";
+                                } else if (j === 1) {
+                                    extraRowCapitalized = "PTO";
+                                } else {
+                                    extraRowCapitalized = extraRow.charAt(0).toUpperCase() + extraRow.slice(1);
+                                }
                                 const trObj = {
                                     cells: [
                                         {
                                             cellType: "td",
-                                            cellValue: `${extraRowCapitalized} (hrs)`,
+                                            cellValue: `${extraRowCapitalized}`,
                                             justText: true,
                                         },
                                         {
@@ -335,36 +344,68 @@ router.get("/", async (req, res) => {
                                 }
                                 for (let k = 0; k < week.length; k++) {
                                     const weekDay = week[k];
-                                    let isNotApproved = !timecard.isApproved;
-                                    let justText = !isNotApproved;
-                                    let cellValue;
-                                    if (j < 2) {
-                                        cellValue = offDay[`${weekDay}_${extraRow}_${i + 1}`];
+                                    if (j === 0) {
+                                        // make it a select with the correct option first
+                                        let cellValue = offDay[`${weekDay}_${extraRow}_${i + 1}`];
+                                        const ptoValues = [];
+                                        for (let l = 0; l < ptoTypes.length; l++) {
+                                            const ptoType = ptoTypes[l];
+                                            const ptoValue = {
+                                                value: l,
+                                                type: ptoType,
+                                            }
+                                            ptoValues.push(ptoValue);
+                                        }
+                                        if (cellValue) {
+                                            const selectedValue = ptoValues.splice(cellValue, 1);
+                                            ptoValues.unshift(selectedValue[0]);
+                                        }
+                                        const cellObj = {
+                                            cellType: "td",
+                                            id: true,
+                                            idValue: `${weekDay}_${extraRow}_${i + 1}`, // "weekDay-extrarow-week"
+                                            isSelect: true,
+                                            options: ptoValues,
+                                            classValue: `${extraRow}-${i + 1}-${timecard.timecard_id}`,
+                                            inputDataAttributes: [
+                                                { data: "extratype", dataValue: extraRow },
+                                                { data: "timecardid", dataValue: timecard.timecard_id },
+                                            ],
+                                        }
+                                        trObj.cells.splice(trObj.cells.length - 1, 0, cellObj);
                                     } else {
-                                        isNotApproved = false;
-                                        justText = true;
-                                        cellValue = "";
+                                        let isNotApproved = !timecard.isApproved;
+                                        let justText = !isNotApproved;
+                                        let cellValue;
+                                        if (j < 2) {
+                                            cellValue = offDay[`${weekDay}_${extraRow}_${i + 1}`];
+                                        } else {
+                                            isNotApproved = false;
+                                            justText = true;
+                                            cellValue = "";
+                                        }
+                                        const cellObj = {
+                                            cellType: "td",
+                                            isSelect: false,
+                                            id: true,
+                                            idValue: `${extraRow}-${i + 1}-${weekDay}-${timecard.timecard_id}`, // "type-week-day-timecardId"
+                                            cellValue,
+                                            justText,
+                                            isNotApproved,
+                                            isExtraRow: true,
+                                            inputDataAttributes: [
+                                                { data: "extratype", dataValue: extraRow },
+                                                { data: "timecardid", dataValue: timecard.timecard_id },
+                                            ],
+                                            classValue: `${extraRow}-${i + 1}-${timecard.timecard_id}`,
+                                        }
+                                        if (isNotApproved) {
+                                            cellObj.idValue = `${weekDay}_${extraRow}_${i + 1}`;
+                                        } else {
+                                            cellObj.class = true;
+                                        }
+                                        trObj.cells.splice(trObj.cells.length - 1, 0, cellObj);
                                     }
-                                    const cellObj = {
-                                        cellType: "td",
-                                        id: true,
-                                        idValue: `${extraRow}-${i + 1}-${weekDay}-${timecard.timecard_id}`, // "type-week-day-timecardId"
-                                        cellValue,
-                                        justText,
-                                        isNotApproved,
-                                        isExtraRow: true,
-                                        inputDataAttributes: [
-                                            { data: "extratype", dataValue: extraRow },
-                                            { data: "timecardid", dataValue: timecard.timecard_id },
-                                        ],
-                                        classValue: `${extraRow}-${i + 1}-${timecard.timecard_id}`,
-                                    }
-                                    if (isNotApproved) {
-                                        cellObj.idValue = `${weekDay}_${extraRow}_${i + 1}`;
-                                    } else {
-                                        cellObj.class = true;
-                                    }
-                                    trObj.cells.splice(trObj.cells.length - 1, 0, cellObj);
                                 }
                                 weekObj.trs.push(trObj);
                             }

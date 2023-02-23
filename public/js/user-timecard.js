@@ -130,7 +130,9 @@ if (hasTimeCard === "true") {
 
     const updateOffDayCell = async (e, timecardId) => {
         const value = e.target.value;
+        console.log(value);
         const key = e.target.id;
+        console.log(key);
         const updateObj = {
             key,
             value,

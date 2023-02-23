@@ -70,27 +70,27 @@ const processTimeCard = (timeCells, vacationTimeCells, sickTimeCells, type = "ce
 
     // Accounting for sick and vacation to offset dailyTotals
     // Setting sick and vacation
-    let vacationTotal = 0;
+    // let vacationTotal = 0;
     let sickTotal = 0;
     for (let i = 0; i < details.dailyTotals.length; i++) {
         let total = details.dailyTotals[i];
         const sickCell = sickTimeCells[i];
-        const vacationCell = vacationTimeCells[i];
+        // const vacationCell = vacationTimeCells[i];
         let sickValue;
-        let vacationValue;
+        // let vacationValue;
         if (type === "input") {
             sickValue = sickCell.value;
-            vacationValue = vacationCell.value;
+            // vacationValue = vacationCell.value;
         } else {
             sickValue = sickCell.textContent;
-            vacationValue = vacationCell.textContent;
+            // vacationValue = vacationCell.textContent;
         }
-        vacationTotal = vacationTotal + Number(vacationValue);
+        // vacationTotal = vacationTotal + Number(vacationValue);
         sickTotal = sickTotal + Number(sickValue);
-        total = total + Number(sickValue) + Number(vacationValue);
+        total = total + Number(sickValue) /*+ Number(vacationValue)*/;
         details.dailyTotals[i] = total;
     }
-    details.vacation = vacationTotal;
+    // details.vacation = vacationTotal;
     details.sick = sickTotal;
 
     // Setting weeklyTotal
@@ -104,7 +104,7 @@ const processTimeCard = (timeCells, vacationTimeCells, sickTimeCells, type = "ce
     let overtimeTotal = 0;
     let dailyTotal = 0;
     for (let i = 0; i < details.dailyTotals.length; i++) {
-        const dayTotal = details.dailyTotals[i] - (sickValues[i] + vacationValues[i]);
+        const dayTotal = details.dailyTotals[i] - (sickValues[i] /*+ vacationValues[i]*/);
         dailyTotal = dailyTotal + dayTotal;
         if (dailyTotal > 40) {
             details.dailyOvertimes[i] = dailyTotal - 40 - overtimeTotal;
