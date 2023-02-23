@@ -172,16 +172,22 @@ const populateTimecard = async (e) => {
         }
 
         for (let j = 0; j < 2; j++) {
+            const newPTOLabels = ["PTO Type", "PTO"];
             const extraRow = ["vacation", "sick"][j];
+            const ptoTypes = ["None", "Vacation", "Sick", "Holiday", "Sabbatical", "Jury Duty", "Benevolence"];
             const newRow = document.createElement("tr");
             const labelCell = document.createElement("td");
-            labelCell.textContent = extraRow.charAt(0).toUpperCase() + extraRow.slice(1);
+            labelCell.textContent = newPTOLabels[j].charAt(0).toUpperCase() + newPTOLabels[j].slice(1);
             newRow.appendChild(labelCell);
             for (let k = 0; k < week.length; k++) {
                 const day = week[k];
                 const newCell = document.createElement("td");
                 newCell.setAttribute("class", `${extraRow}-cell-${i + 1}`);
-                newCell.textContent = selectedOffDay[`${day}_${extraRow}_${i + 1}`];
+                if (j === 0) {
+                    newCell.textContent = ptoTypes[selectedOffDay[`${day}_${extraRow}_${i + 1}`]];
+                } else {
+                    newCell.textContent = selectedOffDay[`${day}_${extraRow}_${i + 1}`];
+                }
                 newRow.appendChild(newCell);
             }
             const totalCell = document.createElement("td");
@@ -324,11 +330,12 @@ const populateTimecard = async (e) => {
                 const otherVacationCells = [];
                 const otherVacationSickTotals = [];
                 // Creating the vacation and sick rows
+                const newPTOLabels = ["PTO Type", "PTO"];
                 const vacationSickArr = ["vacation", "sick"];
                 const offDay = otherTimeCard.OffDay;
                 for (let j = 0; j < vacationSickArr.length; j++) {
                     const vacationSick = vacationSickArr[j];
-                    const vacationSickCapitalized = vacationSick.charAt(0).toUpperCase() + vacationSick.slice(1);
+                    const vacationSickCapitalized = newPTOLabels[j].charAt(0).toUpperCase() + newPTOLabels[j].slice(1);
                     const newRow = document.createElement("tr");
                     const labelCell = document.createElement("td");
                     labelCell.textContent = vacationSickCapitalized;

@@ -47,7 +47,7 @@ const processTimeCard = (timeCells, vacationTimeCells, sickTimeCells, type = "ce
         weeklyOvertime: 0,
         dailyTotals: [0, 0, 0, 0, 0, 0, 0],
         weeklyTotal: 0,
-        vacation: 0,
+        vacation: "",
         sick: 0,
     };
 
@@ -85,7 +85,7 @@ const processTimeCard = (timeCells, vacationTimeCells, sickTimeCells, type = "ce
             sickValue = sickCell.textContent;
             // vacationValue = vacationCell.textContent;
         }
-        // vacationTotal = vacationTotal + Number(vacationValue);
+        //vacationTotal = vacationTotal + Number(vacationValue)
         sickTotal = sickTotal + Number(sickValue);
         total = total + Number(sickValue) /*+ Number(vacationValue)*/;
         details.dailyTotals[i] = total;
