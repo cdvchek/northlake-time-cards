@@ -61,13 +61,13 @@ const openPdf = (bodies, name, title, period) => {
     createPdf(docDefinition).open();
 }
 
-const downloadPdf = (bodies, name) => {
+const downloadPdf = (bodies, name, title, period) => {
     const docDefinition = generatePdf(bodies, name, title, period);
 
     createPdf(docDefinition).download();
 }
 
-const printPdf = (bodies, name) => {
+const printPdf = (bodies, name, title, period) => {
     const docDefinition = generatePdf(bodies, name, title, period);
 
     createPdf(docDefinition).print();
@@ -238,11 +238,14 @@ const setupModalTimecards = async (userId, multipleTimecards = true, timecard_id
             const sickCells = [];
             let vacationCell;
             let sickCell;
+            const newPTOLabels = ["PTO Type", "PTO"];
+            const ptoTypes = ["None", "Vacation", "Sick", "Holiday", "Sabbatical", "Jury Duty", "Benevolence"];
+            const ptoTypesAbb = ["None", "Vactn", "Sick", "Holid", "Sabbt", "Jury", "Benev"];
             const vacationSickArr = ["vacation", "sick"];
             // Creating the vacation and sick rows
             for (let j = 0; j < vacationSickArr.length; j++) {
                 const vacationSick = vacationSickArr[j];
-                const vacationSickCapitalized = vacationSick.charAt(0).toUpperCase() + vacationSick.slice(1);
+                const vacationSickCapitalized = newPTOLabels[j].charAt(0).toUpperCase() + newPTOLabels[j].slice(1);
                 const pdfRow = [vacationSickCapitalized];
                 const newRow = document.createElement("tr");
                 const labelCell = document.createElement("td");
@@ -251,9 +254,17 @@ const setupModalTimecards = async (userId, multipleTimecards = true, timecard_id
                 for (let k = 0; k < week.length; k++) {
                     const day = week[k];
                     const newCell = document.createElement("td");
-                    newCell.textContent = offDay[`${day}_${vacationSick}_${l + 1}`];
+                    if (j == 0) {
+                        newCell.textContent = ptoTypes[offDay[`${day}_${vacationSick}_${i + 1}`]];
+                    } else {
+                        newCell.textContent = offDay[`${day}_${vacationSick}_${i + 1}`];
+                    }
                     newRow.appendChild(newCell);
-                    pdfRow.push(offDay[`${day}_${vacationSick}_${l + 1}`]);
+                    if (j == 0) {
+                        pdfRow.push(ptoTypesAbb[offDay[`${day}_${vacationSick}_${l + 1}`]]);
+                    } else {
+                        pdfRow.push(offDay[`${day}_${vacationSick}_${l + 1}`]);
+                    }
                     if (j === 0) {
                         vacationCells.push(newCell);
                     } else {

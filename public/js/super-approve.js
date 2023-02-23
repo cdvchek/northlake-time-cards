@@ -331,6 +331,7 @@ const populateTimecard = async (e) => {
                 const otherVacationSickTotals = [];
                 // Creating the vacation and sick rows
                 const newPTOLabels = ["PTO Type", "PTO"];
+                const ptoTypes = ["None", "Vacation", "Sick", "Holiday", "Sabbatical", "Jury Duty", "Benevolence"];
                 const vacationSickArr = ["vacation", "sick"];
                 const offDay = otherTimeCard.OffDay;
                 for (let j = 0; j < vacationSickArr.length; j++) {
@@ -344,7 +345,11 @@ const populateTimecard = async (e) => {
                         const day = week[k];
                         const newCell = document.createElement("td");
                         newCell.setAttribute("class", `othertitle-${i + 1}-${vacationSick}`);
-                        newCell.textContent = offDay[`${day}_${vacationSick}_${i + 1}`];
+                        if (j == 0) {
+                            newCell.textContent = ptoTypes[offDay[`${day}_${vacationSick}_${i + 1}`]];
+                        } else {
+                            newCell.textContent = offDay[`${day}_${vacationSick}_${i + 1}`];
+                        }
                         newRow.appendChild(newCell);
                         if (j === 0) {
                             otherVacationCells.push(newCell);
