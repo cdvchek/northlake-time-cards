@@ -255,9 +255,9 @@ const setupModalTimecards = async (userId, multipleTimecards = true, timecard_id
                     const day = week[k];
                     const newCell = document.createElement("td");
                     if (j == 0) {
-                        newCell.textContent = ptoTypes[offDay[`${day}_${vacationSick}_${i + 1}`]];
+                        newCell.textContent = ptoTypes[offDay[`${day}_${vacationSick}_${l + 1}`]];
                     } else {
-                        newCell.textContent = offDay[`${day}_${vacationSick}_${i + 1}`];
+                        newCell.textContent = offDay[`${day}_${vacationSick}_${l + 1}`];
                     }
                     newRow.appendChild(newCell);
                     if (j == 0) {
@@ -285,6 +285,7 @@ const setupModalTimecards = async (userId, multipleTimecards = true, timecard_id
                 }
                 bodies[l].push(pdfRow);
             }
+            console.log(bodies);
 
             const details = processTimeCard(timeCells, vacationCells, sickCells);
 
