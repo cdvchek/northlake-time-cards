@@ -437,6 +437,7 @@ router.get("/", async (req, res) => {
                         readyStatus,
                         unreadyStatus,
                         hasTimeCard: true,
+                        userName: req.session.user.name,
                         isAdmin: req.session.user.isAdmin,
                         isSuper: req.session.user.isSuper,
                         timecards,
@@ -445,6 +446,7 @@ router.get("/", async (req, res) => {
                     }
                 } else {
                     hbsObj = {
+                        userName: req.session.user.name,
                         isAdmin: req.session.user.isAdmin,
                         isSuper: req.session.user.isSuper,
                         hasTimeCard: false,
@@ -452,6 +454,7 @@ router.get("/", async (req, res) => {
                 }
             } else {
                 hbsObj = {
+                    userName: req.session.user.name,
                     isAdmin: req.session.user.isAdmin,
                     isSuper: req.session.user.isSuper,
                     hasTimeCard: false,
