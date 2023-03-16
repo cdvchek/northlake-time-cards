@@ -80,3 +80,19 @@ if (isAdmin) {
 // helpBtn.addEventListener("click", goToHelp);
 updatesBtn.addEventListener("click", goToUpdates);
 logoutBtn.addEventListener("click", goToLogout);
+
+const hamburgerBtn = document.getElementById("nav-hamburger");
+let isMobileMenuOpen = false;
+
+const toggleMobileMenu = () => {
+    if (!isMobileMenuOpen) {
+        // Opening the mobile menu
+        navBar.setAttribute("class", "mobile");
+    } else {
+        // Closing the mobile menu
+        navBar.removeAttribute("class");
+    }
+    isMobileMenuOpen = !isMobileMenuOpen;
+}
+
+hamburgerBtn.addEventListener("click", toggleMobileMenu);

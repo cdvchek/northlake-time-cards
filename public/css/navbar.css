@@ -64,4 +64,16 @@ nav {
     #nav-hamburger {
         display: inline;
     }
+
+    .mobile > .left {
+        display: block;
+        position: relative;
+        top: var(--height);
+        background-color: rgb(120, 198, 219);
+        width: 120px;
+        margin: 0;
+        padding: 15px;
+        float: right;
+        clear: right;
+    }
 }
