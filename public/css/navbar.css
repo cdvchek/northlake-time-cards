@@ -37,3 +37,31 @@ nav {
 #nav-username {
     cursor: default;
 }
+
+#nav-hamburger {
+    display: none;
+    position: absolute;
+    right: 30px;
+    top: -3px;
+}
+
+.hamburger-bar {
+    width: 23px;
+    height: 3px;
+    background-color: white;
+    margin: 4px 0;
+}
+
+@media screen and (max-width: 1095px) {
+    .left {
+        display: none;
+    }
+
+    #nav-username {
+        display: none;
+    }
+
+    #nav-hamburger {
+        display: inline;
+    }
+}
