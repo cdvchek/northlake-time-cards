@@ -1,11 +1,8 @@
-#background {
+/* #background {
     width: 100vw;
     height: 100vh;
     background-color: gainsboro;
-    text-align: center;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    margin: 0;
 }
 
 #supers-div {
@@ -70,4 +67,81 @@ li {
 
 .selectedSupervisor {
     border: blue solid 5px;
+} */
+
+/* New CSS */
+
+#background {
+    width: 100vw;
+    height: 100vh;
+    background-color: gainsboro;
+    margin: 0;
+}
+
+.hidden-div {
+    display: none;
+}
+
+#employee-select {
+    width: 90%;
+    max-width: 600px;
+    background-color: white;
+    margin: 0 auto;
+    text-align: center;
+    box-shadow: 0 0 15px grey;
+    padding-bottom: 20px;
+}
+
+#employee-manage {
+    width: 90%;
+    max-width: 600px;
+    background-color: white;
+    margin: 0 auto;
+    text-align: center;
+    box-shadow: 0 0 15px grey;
+    padding-bottom: 20px;
+}
+
+#select-employee-title {
+    padding-top: 20px;
+}
+
+li {
+    border: 1px solid;
+    list-style: none;
+    position: relative;
+    right: 3.5%;
+    text-align: left;
+    padding: 10px 15px;
+    margin: 10px;
+}
+
+li:hover {
+    background-color: gainsboro;
+}
+
+.mark-super {
+    position: absolute;
+    right: 10px;
+    text-align: right;
+}
+
+#back-btn {
+    position: absolute;
+    left: 20px;
+    top: 70px;
+    background: none;
+    border: solid 2.5px rgb(9, 139, 175);
+    margin: 20px;
+    color: rgb(9, 139, 175);
+    font-size: 100%;
+    padding: 5px;;
+}
+
+#back-sign {
+    font-size: 110%;
+}
+
+#employee-name {
+    padding-top: 60px;
 }

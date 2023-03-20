@@ -248,3 +248,47 @@ for (let i = 0; i < removeSuperBtns.length; i++) {
     const removeSuperBtn = removeSuperBtns[i];
     removeSuperBtn.addEventListener("click", removeSuper);
 }
+
+// Allow the user to manage the supervisees of supervisors and to set employees as supervisors
+
+    // Allow the user to set employees as supervisors
+
+        // The user needs to be able to select an employee
+        // After selecting an employee, the user needs to be able to toggle the supervisor status of the selected employee
+
+    // Allow the user to manage the supervisees of supervisors
+
+        // The user needs to be able to select an employee
+        // After selecting an employee, if the employee is a supervisor, the user will be able to select from a new list of all employees, who will be supervisees under the selected employee as a supervisor
+
+// Grabbing the two pages
+const divEmployeeSelect = document.getElementById("employee-select");
+const divEmployeeManage = document.getElementById("employee-manage");
+
+// Grabbing each employee li that can be selected
+const employeeLis = document.getElementsByClassName("li-employee");
+
+// Changing to the employee manage div
+const selectEmployee = (e) => {
+    const employeeId = Number(e.target.getAttribute("data-id"));
+    divEmployeeSelect.setAttribute("class", "hidden-div");
+    divEmployeeManage.removeAttribute("class");
+}
+
+// Adding the event listener to each employee li that can be selected
+for (let i = 0; i < employeeLis.length; i++) {
+    const employeeLi = employeeLis[i];
+    employeeLi.addEventListener("click", selectEmployee);
+}
+
+// Grabbing the back button from the manage div
+const backBtn = document.getElementById("back-btn");
+
+// Changing to the employee select div
+const goBack = () => {
+    divEmployeeManage.setAttribute("class", "hidden-div");
+    divEmployeeSelect.removeAttribute("class");
+}
+
+// Adding the event lister to the back button
+backBtn.addEventListener("click", goBack);

@@ -5,26 +5,33 @@ const { User } = require('../../models');
 // Administrator Manage Supervisors - RESTR: ADMIN
 router.get("/", async (req, res) => {
     try {
-        if (req.session.user && req.session.user.isAdmin) {
-            let users = (await User.findAll()).map((user) => user.dataValues);
-            users = users.map((user) => {
-                return {
-                    ...user,
-                    nameHyphen: user.name.replaceAll(" ", "@"),
-                }
-            });
 
+        // The user must be registered and an admin to access this route
+        if (req.session.user && req.session.user.isAdmin) {
+
+            // All of the users have to be found to list them as potential supervisors
+            let users = (await User.findAll()).map((user) => user.dataValues);
+
+            // Preparing the handlebars object
             const hbsObj = {
-                supers: users,
+                users,
                 userName: req.session.user.name,
                 isAdmin: req.session.user.isAdmin,
                 isSuper: req.session.user.isSuper,
             }
+
+            // Rendering the template
             res.render("admin-managesupers", hbsObj);
+            
+        // The user was trying to access a route they don't have permission to access
         } else {
+
+            // Destroying the session and sending the user to sign in
             req.session.destroy();
             res.render("signin");
         }
+    
+    // Basic error handling
     } catch (err) {
         console.log(err);
         res.status(500).json(err);

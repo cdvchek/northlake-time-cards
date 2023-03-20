@@ -1,7 +1,7 @@
 <link rel="stylesheet" href="../css/admin-managesupers.css">
 <div id="background">
     {{> navbar}}
-    <div id="supers-div">
+    {{!-- <div id="supers-div">
         <ul>
             {{#each supers}}
             {{#if this.isSuper}}
@@ -21,6 +21,29 @@
         <ul id="supervisees">
         </ul>
         <ul id="not-supervisees">
+        </ul>
+    </div> --}}
+    <div id="employee-select">
+        <h2 id="select-employee-title">Select an Employee</h2>
+        <ul id="employee-list">
+            {{#each users}}
+            <li data-id={{this.user_id}} class="li-employee">{{this.name}}{{#if this.isSuper}}<span class="mark-super">Supervisor</span>{{/if}}</li>
+            {{/each}}
+        </ul>
+    </div>
+    <div id="employee-manage" class="hidden-div">
+        <button id="back-btn"><span id="back-sign">&lt;</span> Back</button>
+        <h1 id="employee-name">Carsdan Dvorachek</h1>
+        <h2 id="supervisor-title">Supervisor Status</h2>
+        <select name="supervisor-status" id="supervisor-status-select">
+            <option value="supervisor">Supervisor</option>
+            <option value="employee">Employee</option>
+        </select>
+        <h2 id="supervisor-title">Supervising</h2>
+        <ul>
+            {{#each users}}
+            <li>{{this.name}}</li>
+            {{/each}}
         </ul>
     </div>
 </div>
