@@ -261,18 +261,59 @@ for (let i = 0; i < removeSuperBtns.length; i++) {
         // The user needs to be able to select an employee
         // After selecting an employee, if the employee is a supervisor, the user will be able to select from a new list of all employees, who will be supervisees under the selected employee as a supervisor
 
+
 // Grabbing the two pages
 const divEmployeeSelect = document.getElementById("employee-select");
 const divEmployeeManage = document.getElementById("employee-manage");
+
+// Grabbing the elements of the second page
+const nameTitle = document.getElementById("employee-name");
+const supervisorStatus = document.getElementById("supervisor-status-select");
 
 // Grabbing each employee li that can be selected
 const employeeLis = document.getElementsByClassName("li-employee");
 
 // Changing to the employee manage div
-const selectEmployee = (e) => {
-    const employeeId = Number(e.target.getAttribute("data-id"));
+const selectEmployee = async (e) => {
+    const employeeId = e.target.getAttribute("data-id");
+    console.log(employeeId);
+
+    // Hiding the first page and displaying the second
     divEmployeeSelect.setAttribute("class", "hidden-div");
     divEmployeeManage.removeAttribute("class");
+
+    // Changing the name on the second page to reflect the selected employee
+    const employeeName = e.target.innerHTML.split("<span")[0];
+    nameTitle.textContent = employeeName;
+
+    // Creating the two options for the supervisor status select
+    const supervisorOption = document.createElement("option");
+    const employeeOption = document.createElement("option");
+
+    // Giving the options a value
+    supervisorOption.setAttribute("value", "supervisor");
+    employeeOption.setAttribute("value", "employee");
+
+    // Giving the options readable text
+    supervisorOption.textContent = "Supervisor";
+    employeeOption.textContent = "Employee";
+
+    // Grabbing the employee data to see if the selected employee is a supervisor
+    const employeeData = await (await fetch('/api/users/user-id/' + employeeId)).json();
+    
+    // Clearing the select of any options
+    while (supervisorStatus.children.length > 0) {
+        supervisorStatus.children[0].remove();
+    }
+    
+    // If the selected user is a supervisor, display that they are a supervisor in the dropdown and vise versa
+    if (employeeData.isSuper) {
+        supervisorStatus.appendChild(supervisorOption);
+        supervisorStatus.appendChild(employeeOption);
+    } else {
+        supervisorStatus.appendChild(employeeOption);
+        supervisorStatus.appendChild(supervisorOption);
+    }
 }
 
 // Adding the event listener to each employee li that can be selected
