@@ -145,3 +145,12 @@ li:hover {
 #employee-name {
     padding-top: 60px;
 }
+
+.supervisee, .supervisee > span {
+    color: green;
+}
+
+.othersupervisee, .othersupervisee > span {
+    color: grey;
+    border-color: grey;
+}

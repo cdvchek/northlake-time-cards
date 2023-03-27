@@ -21,6 +21,21 @@ router.get("/user-id/:id", async (req, res) => {
 });
 
 // API Get All Users
+router.get("/users-all-title", async (req, res) => {
+    try {
+        if (req.session.user && req.session.user.isAdmin) {
+            const users = await User.findAll({ include: Title });
+            res.json(users);
+        } else {
+            res.status(401).json({ msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
+
+// API Get All Users
 router.get("/users-titles/", async (req, res) => {
     try {
         if (req.session.user && req.session.user.isAdmin) {

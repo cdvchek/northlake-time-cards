@@ -1,5 +1,5 @@
-// Managing a supervisor's users
 const manageUsersBtns = document.getElementsByClassName("manageusers");
+// Managing a supervisor's users
 const superviseesUl = document.getElementById("supervisees");
 const notSuperviseesUl = document.getElementById("not-supervisees");
 let selectedSupervisorId = "-1";
@@ -271,20 +271,231 @@ const nameTitle = document.getElementById("employee-name");
 const supervisorStatus = document.getElementById("supervisor-status-select");
 
 // Grabbing each employee li that can be selected
-const employeeLis = document.getElementsByClassName("li-employee");
+const employeeList = document.getElementsByClassName("li-employee");
+
+// Grabbing the supervisee list
+const superviseeUl = document.getElementById("supervisee-list");
+
+// Fetching all the users
+let allEmployeeData;
+const fetchAllUsers = async () => {
+    allEmployeeData = await (await fetch('/api/users/users-all-title')).json();
+}
+
+// Helper function that finds the name of an employee based off their id
+const findUser = (id) => {
+    let user;
+    for (let i = 0; i < allEmployeeData.length; i++) {
+        const emplData = allEmployeeData[i];
+        if (id === emplData.user_id) {
+            user = emplData;
+            break;
+        }
+    }
+    if (user) {
+        return user;
+    } else {
+        return 404;
+    }
+}
+
+// Sorting the employees into employees who have a supervisor and those that do not
+const noSuperEmployees = [];
+const superEmployees = [];
+const sortEmployees = () => {
+
+    allEmployeeData.forEach(empl => {
+        empl.Titles.forEach(title => {
+            // Giving the employee a name
+            const titleName = `${empl.name} - ${title.name}`;
+
+            // Assigning variables for ease of reading
+            const superviseeId = empl.user_id;
+            const titleId = title.title_id;
+
+            // Checking if the title has a supervisor
+            if (title.supervisor_id) {
+
+                // Finding the name of the supervisor
+                const supervisor = findUser(title.supervisor_id);
+                const supervisorName = supervisor.name;
+                const supervisorId = supervisor.user_id;
+
+                // Pushing to the correct array
+                superEmployees.push({ name: titleName, supervisor: supervisorName, supervisorId, superviseeId, titleId });
+            } else {
+
+                // Pushing to the correct array
+                noSuperEmployees.push({ name: titleName, superviseeId, titleId });
+            }
+        });
+    });
+}
+
+// Wrapper function
+const wrapper = async () => {
+    await fetchAllUsers();
+    sortEmployees();
+}
+wrapper();
+
+// Function that is run on click of a li on the second page
+const processSupervisee = async (e) => {
+    // Making sure the target is the li, not the span in the li
+    let target = e.target;
+    if (e.target.nodeName === "SPAN") {
+        target = target.parentNode;
+    }
+
+    // Grabbing the supervisor, supervisee, and title ids
+    const superviseeId = target.getAttribute("data-superviseeid");
+    const supervisorId = target.getAttribute("data-supervisorid");
+    const titleId = target.getAttribute("data-titleid");
+
+    // Getting the supervisee type
+    const targetType = target.getAttribute("class");
+
+    switch (targetType) {
+        case "supervisee":
+            // This mean the user would like to remove the selected li as a supervisee
+            const removeObj = {
+                superviseeId,
+                supervisorId,
+                titleId,
+            }
+            
+            const response = await fetch("/api/supervising/remove-supervisee", {
+                method: "PUT",
+                body: JSON.stringify(removeObj),
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            });
+
+            console.log(await response.json());
+
+            break;
+
+        case "nosupervisee":
+            // This means the user would like to add the selected li as a supervisee
+            const addObj = {
+                superviseeId,
+                supervisorId,
+                titleId,
+            }
+            await fetch("/api/supervising/add-supervisee", {
+                method: "PUT",
+                body: JSON.stringify(addObj),
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            });
+            break;
+
+        case "othersupervisee":
+            // Prompt the user that adding the selected li will remove the selected li from their current supervisors list of supervisees and add it to the selected employees list of supervisees
+            console.log("do a promt and other stuff");
+            break;
+    
+        default:
+            break;
+    }
+}
+
+// Function that populates the supervisee list
+const populateSupervisees = (supervisees) => {
+    let superviseesList = [];
+    let selectedEmployeeId;
+
+    if (supervisees) {
+        // First, show the selected employee's supervisees and display that the selected employee is the supervisor
+        const selectedSupervisees = supervisees.replace(",","").split(",");
+        selectedSupervisees.forEach(supervisee => {
+            const idCombo = supervisee.split("-");
+            const superviseeId = idCombo[0];
+            const titleId = idCombo[1];
+            const superviseeData = findUser(Number(superviseeId));
+            superviseeData.Titles.forEach(title => {
+                if (titleId == title.title_id) {
+                    const superviseeName = `${superviseeData.name} - ${title.name}`;
+                    const supervisorName = findUser(title.supervisor_id).name;
+                    superviseesList.push({ name: superviseeName, supervisor: supervisorName , supervisorId: title.supervisor_id, superviseeId: superviseeData.user_id, titleId: title.title_id });
+                    selectedEmployeeId = title.supervisor_id;
+                }
+            });
+        });
+    }
+
+    // Create a new array of employees with supervisors that excludes the supervisees of the selected employer
+    let excludingSuperEmployees = [];
+
+    if (superviseesList.length > 0) {
+        for (let i = 0; i < superEmployees.length; i++) {
+            const superEmpl = superEmployees[i];
+            for (let j = 0; j < superviseesList.length; j++) {
+                const selectedSupervisee = superviseesList[j];
+                if (superEmpl.supervisorId != selectedSupervisee.supervisorId) {
+                    excludingSuperEmployees.push(superEmpl);
+                }
+            }
+        }
+    } else {
+        excludingSuperEmployees = [...superEmployees];
+    }
+
+    // Then show employees who don't have a supervisor and after employees who do have supervisors
+    superviseesList = [...superviseesList, ...noSuperEmployees, ...excludingSuperEmployees];
+
+    superviseesList.forEach(entry => {
+        console.log(entry);
+        // Creating the Li for the entry
+        const newLi = document.createElement("li");
+
+        // Adding the onclick event
+        newLi.addEventListener("click", processSupervisee);
+        
+        // Adding the correct class
+        if (entry.supervisorId === selectedEmployeeId) {
+            newLi.setAttribute("class", "supervisee");
+        } else if (!entry.supervisorId) {
+            newLi.setAttribute("class", "nosupervisee");
+        } else {
+            newLi.setAttribute("class", "othersupervisee");
+        }
+
+        newLi.setAttribute("data-superviseeid", entry.superviseeId);
+        newLi.setAttribute("data-supervisorid", selectedEmployeeId);
+        newLi.setAttribute("data-titleid", entry.titleId);
+
+        // Adding the name
+        newLi.textContent = entry.name;
+
+        // Adding the Supervisor name
+        const supervisorSpan = document.createElement("span");
+        supervisorSpan.setAttribute("class", "mark-super");
+        supervisorSpan.textContent = entry.supervisor;
+
+        // Appending the span to the li
+        newLi.appendChild(supervisorSpan);
+
+        // Appending the li to the ul
+        superviseeUl.appendChild(newLi);
+    });
+}
 
 // Changing to the employee manage div
 const selectEmployee = async (e) => {
     const employeeId = e.target.getAttribute("data-id");
-    console.log(employeeId);
 
     // Hiding the first page and displaying the second
     divEmployeeSelect.setAttribute("class", "hidden-div");
     divEmployeeManage.removeAttribute("class");
 
+    // Grabbing the employee data to see if the selected employee is a supervisor
+    const employeeData = await (await fetch('/api/users/user-id/' + employeeId)).json();
+    
     // Changing the name on the second page to reflect the selected employee
-    const employeeName = e.target.innerHTML.split("<span")[0];
-    nameTitle.textContent = employeeName;
+    nameTitle.textContent = employeeData.name;
 
     // Creating the two options for the supervisor status select
     const supervisorOption = document.createElement("option");
@@ -298,18 +509,13 @@ const selectEmployee = async (e) => {
     supervisorOption.textContent = "Supervisor";
     employeeOption.textContent = "Employee";
 
-    // Grabbing the employee data to see if the selected employee is a supervisor
-    const employeeData = await (await fetch('/api/users/user-id/' + employeeId)).json();
-    
-    // Clearing the select of any options
-    while (supervisorStatus.children.length > 0) {
-        supervisorStatus.children[0].remove();
-    }
-    
     // If the selected user is a supervisor, display that they are a supervisor in the dropdown and vise versa
     if (employeeData.isSuper) {
         supervisorStatus.appendChild(supervisorOption);
         supervisorStatus.appendChild(employeeOption);
+
+        // Populate the supervisee list
+        populateSupervisees(employeeData.supervisees);
     } else {
         supervisorStatus.appendChild(employeeOption);
         supervisorStatus.appendChild(supervisorOption);
@@ -317,8 +523,8 @@ const selectEmployee = async (e) => {
 }
 
 // Adding the event listener to each employee li that can be selected
-for (let i = 0; i < employeeLis.length; i++) {
-    const employeeLi = employeeLis[i];
+for (let i = 0; i < employeeList.length; i++) {
+    const employeeLi = employeeList[i];
     employeeLi.addEventListener("click", selectEmployee);
 }
 
@@ -329,6 +535,19 @@ const backBtn = document.getElementById("back-btn");
 const goBack = () => {
     divEmployeeManage.setAttribute("class", "hidden-div");
     divEmployeeSelect.removeAttribute("class");
+
+    // Clearing the select of any options
+    while (supervisorStatus.children.length > 0) {
+        supervisorStatus.children[0].remove();
+    }
+
+    // Clearing the supervisee ul
+    while (superviseeUl.children.length > 0) {
+        superviseeUl.children[0].remove();
+    }
+
+    // Changing the name on the second page to nothing so it looks better when selecting an employee from the first page
+    nameTitle.textContent = "";
 }
 
 // Adding the event lister to the back button

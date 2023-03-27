@@ -16,4 +16,7 @@ router.use("/titles", titleRoutes);
 const timeInOutRoutes = require("./timeinoutsRoutes");
 router.use("/timeinouts", timeInOutRoutes);
 
+const supervisingRoutes = require("./supervisingRoutes");
+router.use("/supervising", supervisingRoutes);
+
 module.exports = router;
