@@ -262,7 +262,7 @@ for (let i = 0; i < removeSuperBtns.length; i++) {
         // After selecting an employee, if the employee is a supervisor, the user will be able to select from a new list of all employees, who will be supervisees under the selected employee as a supervisor
 
 
-// IF YOU REFRESH EVERY TIME IT WORKS, GETTING IT TO WORK IN REAL TIME IS THE PROBLEM NOW GOOD LUCK FUTURE ME!!!!!
+// IF YOU REFRESH EVERY TIME IT WORKS, GETTING IT TO WORK IN REAL TIME IS THE PROBLEM NOW GOOD LUCK FUTURE ME!!!!!!
 
 
 // Grabbing the two pages
