@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { User, TimeCard, TimeInOut, TimePeriod, Title } = require('../../models');
+const { User, Title } = require('../../models');
 
 // Adding a supervisee
 router.put("/add-supervisee", async (req, res) => {
@@ -23,7 +23,7 @@ router.put("/add-supervisee", async (req, res) => {
 
             // Finding the existing supervisees list and splitting it into an array
             const superviseesList = (await User.findByPk(supervisorId)).supervisees;
-            const superviseesArr = superviseesList.replace(",", "").split(",");
+            const superviseesArr = superviseesList.split(",");
 
             // Assigning the new idCombo to be added
             const newIdCombo = `${superviseeId} - ${titleId}`;
@@ -32,7 +32,12 @@ router.put("/add-supervisee", async (req, res) => {
             superviseesArr.push(newIdCombo);
 
             // Joining the arr to make a new string
-            const newSuperviseesList = `,${superviseesArr.join(",")}`;
+            let newSuperviseesList = `,${superviseesArr.join(",")}`;
+
+            // Clean the new supervisees string
+            while (newSuperviseesList[0] === ",") {
+                newSuperviseesList = newSuperviseesList.substring(1, newSuperviseesList.length);
+            }
 
             // Update the supervisor's supervisee list
             await User.update({
@@ -42,6 +47,8 @@ router.put("/add-supervisee", async (req, res) => {
                     user_id: supervisorId
                 }
             });
+
+            res.status(200).json({ msg: "Success!" });
 
         } else {
             res.status(401).json({ msg: "You cannot edit data", msg_type: "UNAUTHORIZED_DATA_EDIT" });
@@ -72,23 +79,21 @@ router.put("/remove-supervisee", async (req, res) => {
             });
 
             // Finding the existing supervisees list and splitting it into an array
-            const superviseesList = (await User.findByPk(supervisorId)).supervisees;
-            const superviseesArr = superviseesList.replace(",", "").split(",");
-            
-            // Initializing the new array for the supervisees list
-            const newSuperviseesArr = [];
+            let superviseesList = (await User.findByPk(supervisorId)).supervisees;
 
-            // Adding all the correct supervisees to the new array
-            for (let i = 0; i < superviseesArr.length; i++) {
-                const idCombo = superviseesArr[i];
-                if (idCombo !== `${superviseeId}-${titleId}`) {
-                    newSuperviseesArr.push(idCombo);
-                }
+            // Clean the supervisees string
+            while (superviseesList[0] === ",") {
+                superviseesList = superviseesList.substring(1, superviseesList.length);
             }
+            
+            // Removing the supervisee from the supervisees list
+            let newSuperviseesList = superviseesList.replaceAll(`,${superviseeId} - ${titleId}`, "");
 
-            // Not sure what happened but the system needs a comma at the front
-            const newSuperviseesList = `,${newSuperviseesArr.join(",")}`;
-
+            // If the supervisee that is wanted to be removed is the first on the supervisees string, there wont be a comma at the front
+            if (superviseesList === newSuperviseesList) {
+                newSuperviseesList = superviseesList.replaceAll(`${superviseeId} - ${titleId}`, "");
+            }
+            
             // Update the supervisor's supervisee list
             await User.update({
                 supervisees: newSuperviseesList
@@ -97,6 +102,32 @@ router.put("/remove-supervisee", async (req, res) => {
                     user_id: supervisorId
                 }
             });
+
+            res.status(200).json({ msg: "Success!" });
+
+        } else {
+            res.status(401).json({ msg: "You cannot edit data", msg_type: "UNAUTHORIZED_DATA_EDIT" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
+
+router.put("/add-remove-supervisor", async (req, res) => {
+    try {
+        if (req.session.user && req.session.user.isAdmin) {
+
+            // Update the user to either remove supervisor status or give supervisor status
+            await User.update({
+                isSuper: req.body.isSuper,
+            }, {
+                where: {
+                    user_id: req.body.userId
+                }
+            });
+
+            res.status(200).json({ msg: "Success!" });
 
         } else {
             res.status(401).json({ msg: "You cannot edit data", msg_type: "UNAUTHORIZED_DATA_EDIT" });

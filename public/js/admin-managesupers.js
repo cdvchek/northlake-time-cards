@@ -262,6 +262,9 @@ for (let i = 0; i < removeSuperBtns.length; i++) {
         // After selecting an employee, if the employee is a supervisor, the user will be able to select from a new list of all employees, who will be supervisees under the selected employee as a supervisor
 
 
+// IF YOU REFRESH EVERY TIME IT WORKS, GETTING IT TO WORK IN REAL TIME IS THE PROBLEM NOW GOOD LUCK FUTURE ME!!!!!
+
+
 // Grabbing the two pages
 const divEmployeeSelect = document.getElementById("employee-select");
 const divEmployeeManage = document.getElementById("employee-manage");
@@ -339,6 +342,35 @@ const wrapper = async () => {
 }
 wrapper();
 
+// Function that is run when the supervisor status select is changed
+const updateSupervisorStatus = async (e) => {
+
+    // Find the id of the user we are updating
+    const userId = e.target.getAttribute('data-id');
+
+    // Determine if we are changing to a normal employee or to a supervisor
+    let isSuper = true;
+    if (e.target.value === "employee") {
+        isSuper = false;
+    }
+
+    // Setup the fetch object
+    const fetchObj = {
+        isSuper,
+        userId,
+    }
+
+    const response = await fetch("/api/supervising/add-remove-supervisor", {
+        method: "PUT",
+        body: JSON.stringify(fetchObj),
+        headers: {
+            "Content-Type": "application/json"
+        },
+    });
+}
+
+supervisorStatus.addEventListener("change", updateSupervisorStatus);
+
 // Function that is run on click of a li on the second page
 const processSupervisee = async (e) => {
     // Making sure the target is the li, not the span in the li
@@ -364,16 +396,13 @@ const processSupervisee = async (e) => {
                 titleId,
             }
             
-            const response = await fetch("/api/supervising/remove-supervisee", {
+            await fetch("/api/supervising/remove-supervisee", {
                 method: "PUT",
                 body: JSON.stringify(removeObj),
                 headers: {
                     "Content-Type": "application/json"
                 },
             });
-
-            console.log(await response.json());
-
             break;
 
         case "nosupervisee":
@@ -400,16 +429,34 @@ const processSupervisee = async (e) => {
         default:
             break;
     }
+
+    // Grabbing the selectedEmployeeId
+    const employeeId = target.parentNode.getAttribute("data-supervisorid");
+
+    // Grabbing the employee data
+    const employeeData = await (await fetch('/api/users/user-id/' + employeeId)).json();
+
+    // Clear the lis
+    while (superviseeUl.children.length > 0) {
+        superviseeUl.children[0].remove();
+    }
+
+    // Re populate the supervisees lis with updated data
+    populateSupervisees(employeeData.supervisees, Number(employeeId));
 }
 
 // Function that populates the supervisee list
-const populateSupervisees = (supervisees) => {
+const populateSupervisees = (supervisees, selectedEmployeeId) => {
     let superviseesList = [];
-    let selectedEmployeeId;
+
+    // Clean the supervisees string
+    while (supervisees[0] === ",") {
+        supervisees = supervisees.substring(1, supervisees.length);
+    }
 
     if (supervisees) {
         // First, show the selected employee's supervisees and display that the selected employee is the supervisor
-        const selectedSupervisees = supervisees.replace(",","").split(",");
+        const selectedSupervisees = supervisees.split(",");
         selectedSupervisees.forEach(supervisee => {
             const idCombo = supervisee.split("-");
             const superviseeId = idCombo[0];
@@ -420,7 +467,6 @@ const populateSupervisees = (supervisees) => {
                     const superviseeName = `${superviseeData.name} - ${title.name}`;
                     const supervisorName = findUser(title.supervisor_id).name;
                     superviseesList.push({ name: superviseeName, supervisor: supervisorName , supervisorId: title.supervisor_id, superviseeId: superviseeData.user_id, titleId: title.title_id });
-                    selectedEmployeeId = title.supervisor_id;
                 }
             });
         });
@@ -434,8 +480,9 @@ const populateSupervisees = (supervisees) => {
             const superEmpl = superEmployees[i];
             for (let j = 0; j < superviseesList.length; j++) {
                 const selectedSupervisee = superviseesList[j];
-                if (superEmpl.supervisorId != selectedSupervisee.supervisorId) {
+                if (superEmpl.supervisorId !== selectedSupervisee.supervisorId) {
                     excludingSuperEmployees.push(superEmpl);
+                    break;
                 }
             }
         }
@@ -445,9 +492,10 @@ const populateSupervisees = (supervisees) => {
 
     // Then show employees who don't have a supervisor and after employees who do have supervisors
     superviseesList = [...superviseesList, ...noSuperEmployees, ...excludingSuperEmployees];
+    console.log(superviseesList);
 
     superviseesList.forEach(entry => {
-        console.log(entry);
+        //console.log(entry);
         // Creating the Li for the entry
         const newLi = document.createElement("li");
 
@@ -455,7 +503,7 @@ const populateSupervisees = (supervisees) => {
         newLi.addEventListener("click", processSupervisee);
         
         // Adding the correct class
-        if (entry.supervisorId === selectedEmployeeId) {
+        if ((entry.supervisorId === selectedEmployeeId) && (entry.supervisorId !== undefined)) {
             newLi.setAttribute("class", "supervisee");
         } else if (!entry.supervisorId) {
             newLi.setAttribute("class", "nosupervisee");
@@ -515,11 +563,16 @@ const selectEmployee = async (e) => {
         supervisorStatus.appendChild(employeeOption);
 
         // Populate the supervisee list
-        populateSupervisees(employeeData.supervisees);
+        populateSupervisees(employeeData.supervisees, employeeData.user_id);
     } else {
         supervisorStatus.appendChild(employeeOption);
         supervisorStatus.appendChild(supervisorOption);
     }
+
+    // Passing data through for later use
+    supervisorStatus.setAttribute("data-id", employeeId);
+
+    superviseeUl.setAttribute("data-supervisorid", employeeData.user_id);
 }
 
 // Adding the event listener to each employee li that can be selected
