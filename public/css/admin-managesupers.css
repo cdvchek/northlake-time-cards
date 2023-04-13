@@ -1,105 +1,26 @@
-/* #background {
-    width: 100vw;
-    height: 100vh;
-    background-color: gainsboro;
-    margin: 0;
-}
-
-#supers-div {
-    border: solid 1px;
-    display: inline-block;
-    height: calc(100% - 140px);
-    width: 45%;
-    background-color: white;
-    margin-top: 20px;
-    margin-right: 35px;
-    box-shadow: 0 0 15px grey;
-}
-
-#users-div {
-    border: solid 1px;
-    display: inline-block;
-    height: calc(100% - 140px);
-    width: 45%;
-    background-color: white;
-    margin-top: 20px;
-    box-shadow: 0 0 15px grey;
-}
-
-li {
-    border: 1px solid;
-    list-style: none;
-    position: relative;
-    right: 3.5%;
-    text-align: left;
-    padding: 10px 15px;
-    margin: 10px;
-}
-
-.setsuper {
-    position: absolute;
-    right: 2%;
-    width: 140px;
-}
-
-.manageusers {
-    position: absolute;
-    right: calc(2% + 150px);
-}
-
-.yesSuper {
-    background-color: rgb(200, 233, 210);
-}
-
-.noSuper {
-    background-color: rgb(200, 226, 233);
-}
-
-.yesSupervisee {
-    background-color: rgb(200, 233, 210);
-}
-
-.noSupervisee {
-    background-color: rgb(223, 223, 223);
-    border-color: rgb(152, 152, 152);
-    color: rgb(152, 152, 152);
-}
-
-.selectedSupervisor {
-    border: blue solid 5px;
-} */
-
-/* New CSS */
-
 #background {
     width: 100vw;
     height: 100vh;
     background-color: gainsboro;
     margin: 0;
+    overflow: scroll;
 }
 
 .hidden-div {
     display: none;
 }
 
-#employee-select {
+#employee-manage, #employee-select {
     width: 90%;
+    height: auto;
     max-width: 600px;
     background-color: white;
     margin: 0 auto;
     text-align: center;
     box-shadow: 0 0 15px grey;
     padding-bottom: 20px;
-}
-
-#employee-manage {
-    width: 90%;
-    max-width: 600px;
-    background-color: white;
-    margin: 0 auto;
-    text-align: center;
-    box-shadow: 0 0 15px grey;
-    padding-bottom: 20px;
+    overflow: hidden;
+    position: relative;
 }
 
 #select-employee-title {
@@ -110,10 +31,10 @@ li {
     border: 1px solid;
     list-style: none;
     position: relative;
-    right: 3.5%;
     text-align: left;
     padding: 10px 15px;
-    margin: 10px;
+    margin: 10px auto;
+    max-width: 80%;
 }
 
 li:hover {
@@ -128,8 +49,8 @@ li:hover {
 
 #back-btn {
     position: absolute;
-    left: 20px;
-    top: 70px;
+    left: 10px;
+    top: 10px;
     background: none;
     border: solid 2.5px rgb(9, 139, 175);
     margin: 20px;
@@ -153,4 +74,15 @@ li:hover {
 .othersupervisee, .othersupervisee > span {
     color: grey;
     border-color: grey;
+}
+
+#supervisee-list, #employee-list {
+    padding-left: 0;
+}
+
+@media screen and (max-width: 580px) {
+    .mark-super {
+        position: static;
+        display: block;
+    }
 }
