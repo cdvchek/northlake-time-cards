@@ -138,4 +138,42 @@ router.put("/add-remove-supervisor", async (req, res) => {
     }
 });
 
+router.put("/clean-supervisees-string/:id", async (req, res) => {
+    try {
+        if (req.session.user && req.session.user.isAdmin) {
+            const user = await User.findByPk(req.params.id);
+
+            if (user.isSuper) {
+                
+                // Update the requested supervisors supervisees string as a clean string
+                let superviseesString = user.supervisees;
+                
+                // Cleaning the "dirty" string
+                while (superviseesString[0] === ",") {
+                    superviseesString = superviseesString.substring(1, superviseesString.length);
+                }
+                
+                // The "clean" string now needs to be saved
+                await User.update({
+                    supervisees: superviseesString
+                }, {
+                    where: {
+                        user_id: user.user_id
+                    }
+                });
+                
+                res.status(200).json({ msg: "Success, your string has been cleaned!" });
+            } else {
+                res.status(200).json({ msg: "Nothing happened because the requested user is not a supervisor" });
+            }
+                
+        } else {
+            res.status(401).json({ msg: "You cannot edit data", msg_type: "UNAUTHORIZED_DATA_EDIT" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
+
 module.exports = router;

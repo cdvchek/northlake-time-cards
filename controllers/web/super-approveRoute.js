@@ -17,8 +17,12 @@ router.get("/", async (req, res) => {
 
             // Getting the user and their supervisees' ids
             const user = (await User.findByPk(req.session.user.user_id)).dataValues;
+
+            // Cleaning the supervisees string
+            user.supervisees = await cleanSuperviseesString(user);
+
+            // Gettings the sueprvisees ids
             const superviseesIds = user.supervisees.split(",");
-            superviseesIds.splice(0, 1);
 
             // Finding the supervisees and the filtered versions
             const supervisees = await findSupervisees(superviseesIds);
@@ -41,8 +45,6 @@ router.get("/", async (req, res) => {
                 isAdmin: req.session.user.isAdmin,
                 isSuper: req.session.user.isSuper,
             }
-
-            console.log(hbsObj.superviseesCurrentCheck);
 
             for (let k = 0; k < periodIdentifiers.length; k++) {
                 const periodIdentifier = periodIdentifiers[k];
@@ -182,4 +184,24 @@ const findChecklistStatus = async (supervisees) => {
         superviseesPreviousCheck,
         superviseesTwoPreviousCheck,
     }
+}
+
+const cleanSuperviseesString = async (user) => {
+    let superviseesString = user.supervisees;
+
+    // Cleaning the "dirty" string
+    while (superviseesString[0] === ",") {
+        superviseesString = superviseesString.substring(1, superviseesString.length);
+    }
+
+    // The "clean" string now needs to be saved
+    await User.update({
+        supervisees: superviseesString
+    }, {
+        where: {
+            user_id: user.user_id
+        }
+    });
+
+    return superviseesString;
 }
