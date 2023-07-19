@@ -81,8 +81,7 @@ const findSupervisees = async ( superviseeIds ) => {
         const [superviseeId, titleId] = superviseeIds[i].split("-");
 
         // Get the supervisee from the supervisee id
-        const supervisee = (await User.findByPk(superviseeId, { include: Title })).dataValues;
-
+        const supervisee = (await User.findByPk(superviseeId, { include: Title }));
         if (supervisee.Titles.length > 1) {// if the supervisee has more than one title then we need to find the correct title
             for (let j = 0; j < supervisee.Titles.length; j++) {
                 const title = supervisee.Titles[j].dataValues;
