@@ -16,7 +16,12 @@ router.get("/", async (req, res) => {
             const [currentPeriodLong, previousPeriodLong, twoPreviousPeriodLong] = periodNamesLong;
 
             // Getting the user and their supervisees' ids
-            const user = (await User.findByPk(req.session.user.user_id)).dataValues;
+            const userRaw = (await User.findByPk(req.session.user.user_id));
+            if (!userRaw) {
+                console.log("No user was found!");
+                return;
+            }
+            const user = userRaw.datavalues;
 
             // Cleaning the supervisees string
             user.supervisees = await cleanSuperviseesString(user);
@@ -84,7 +89,12 @@ const findSupervisees = async ( superviseeIds ) => {
         const supervisee = (await User.findByPk(superviseeId, { include: Title }));
         if (supervisee.Titles.length > 1) {// if the supervisee has more than one title then we need to find the correct title
             for (let j = 0; j < supervisee.Titles.length; j++) {
-                const title = supervisee.Titles[j].dataValues;
+                const titleRaw = supervisee.Titles[j];
+                if (!titleRaw) {
+                    console.log("Something went wrong with retrieving titles, try again later.")
+                    return;
+                }
+                const title = titleRaw.dataValues;
 
                 //Check to see if its the correct title
                 if (title.title_id === Number(titleId)) { // if true then we found the correct title
@@ -105,7 +115,13 @@ const findSupervisees = async ( superviseeIds ) => {
             supervisee.titleName = supervisee.name;
 
             // Add the title id to the supervisee for easy access on the handlebar template
-            supervisee.title_id = supervisee.Titles[0].dataValues.title_id;
+            const titleFirst = supervisee.Titles[0];
+            if (!titleFirst) {
+                console.log("Something went wrong with retrieving first title, try again later.");
+                return;
+            }
+            const titleId = titleFirst.dataValues.title_id;
+            supervisee.title_id = titleId;
 
             // Push onto supervisees
             supervisees.push(supervisee);
@@ -125,7 +141,16 @@ const findReadySupervisees = async ( supervisees ) => {
         const supervisee = supervisees[i];
         
         // Get the supervisees timecards
-        const timecards = (await TimeCard.findAll({ where: { user_id: supervisee.user_id, title_id: supervisee.title_id } })).map(( timecard ) => timecard.dataValues );
+        const timecardsRaw = (await TimeCard.findAll({
+            where: {
+                user_id: supervisee.user_id,
+                title_id: supervisee.title_id
+            }}))
+        if (!timecardsRaw) {
+            console.log("Something went wrong with retreiving timecards.");
+            return;
+        }
+        const timecards = timecardsRaw.map(( timecard ) => timecard.dataValues );
         
         // Check each timecard if they are ready
         for (let j = 0; j < timecards.length; j++) {
@@ -162,7 +187,18 @@ const findChecklistStatus = async (supervisees) => {
             const period = periods[j];
             
             // Getting the supervisee's timecard for each period
-            const timecard = (await TimeCard.findOne({ where: { user_id: supervisee.user_id, title_id: supervisee.title_id, timeperiod_id: period.timeperiod_id } })).dataValues;
+            const timecardRaw = (await TimeCard.findOne({
+                where: {
+                    user_id: supervisee.user_id,
+                    title_id: supervisee.title_id,
+                    timeperiod_id: period.timeperiod_id
+                }})
+            )
+            if (!timecardRaw) {
+                console.log("Something went wrong with retrieving a timecard from a period.");
+                return;
+            }
+            const timecard = timecardRaw.dataValues;
 
             // Setting up the data to be returned
             const superviseeObj = {
