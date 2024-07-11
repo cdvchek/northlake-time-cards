@@ -73,6 +73,7 @@ const populateTimecard = async (e) => {
     periodNameEl.textContent = periodName;
     // Fetching the Data
     const timecardData = await (await fetch("/api/timecards/timecard-period/" + superviseeId + "-" + titleId + "-" + timeperiod)).json();
+    console.log(timecardData);
     const selectedTimecard = timecardData.selectedTimeCard;
     if (selectedTimecard.isApproved) {
         approveBtnEl.setAttribute("class", "approved");
