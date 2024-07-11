@@ -72,7 +72,9 @@ const populateTimecard = async (e) => {
     const periodName = `${periodNameArr[0]} - ${periodNameArr[1]}`;
     periodNameEl.textContent = periodName;
     // Fetching the Data
-    const timecardData = await (await fetch("/api/timecards/timecard-period/" + superviseeId + "-" + titleId + "-" + timeperiod)).json();
+    const fetchString = `/api/timecards/timecard-period/${superviseeId}-${titleId}-${timeperiod}`;
+    console.log(fetchString);
+    const timecardData = await (await fetch(fetchString)).json();
     console.log(timecardData);
     const selectedTimecard = timecardData.selectedTimeCard;
     if (selectedTimecard.isApproved) {
