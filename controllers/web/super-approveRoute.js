@@ -66,6 +66,7 @@ router.get("/", async (req, res) => {
                     }                
                 }
             }
+            console.log("HBSOBJ:", hbsObj);
             res.render("super-approve", hbsObj);
         } else {
             req.session.destroy();
@@ -106,7 +107,7 @@ const findSupervisees = async ( superviseeIds ) => {
                 if (title.title_id === Number(titleId)) { // if true then we found the correct title
                     
                     // Change the name so the user knows they are looking at a specific title
-                    supervisee.titleName = supervisee.name + " - " + title.name;
+                    supervisee.titleName = supervisee.name + "-" + title.name;
 
                     // Add the title id to the supervisee for easy access on the handlebar template
                     supervisee.title_id = title.title_id;
