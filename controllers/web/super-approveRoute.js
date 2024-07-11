@@ -6,28 +6,21 @@ const { weekArrLower, periodIdentifiers, findPeriodNames, findAllDates, findPeri
 // Supervisor Approve - RESTR: SUPER
 router.get("/", async (req, res) => {
     try {
-        console.log("Route accessed");
         if (req.session.user && req.session.user.isSuper) {
-            console.log("User is super.");
             // Getting dates
             const week = weekArrLower;
             const datesObj = await findAllDates();
-            console.log("Dates fetched.");
             const { periodNames, periodNamesLong } = await findPeriodNames();
-            console.log("Period names fetched.");
             const [currentPeriod, previousPeriod, twoPreviousPeriod] = periodNames;
             const [currentPeriodLong, previousPeriodLong, twoPreviousPeriodLong] = periodNamesLong;
 
             // Getting the user and their supervisees' ids
-            console.log("Session UserId:", req.session.user.user_id);
             const userRaw = (await User.findByPk(req.session.user.user_id));
-            console.log("UserRaw:", userRaw);
             if (!userRaw) {
                 console.log("No user was found!");
                 return;
             }
             const user = userRaw.dataValues;
-            console.log("User:", user);
 
             // Cleaning the supervisees string
             user.supervisees = await cleanSuperviseesString(user);
@@ -66,7 +59,6 @@ router.get("/", async (req, res) => {
                     }                
                 }
             }
-            console.log("HBSOBJ:", hbsObj);
             res.render("super-approve", hbsObj);
         } else {
             req.session.destroy();
@@ -135,7 +127,6 @@ const findSupervisees = async ( superviseeIds ) => {
             supervisee.title_id = titleId;
 
             // Push onto supervisees
-            console.log("Supervisee:", supervisee);
             supervisees.push(supervisee);
         }
     }
