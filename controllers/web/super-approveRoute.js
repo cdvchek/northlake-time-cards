@@ -19,13 +19,15 @@ router.get("/", async (req, res) => {
             const [currentPeriodLong, previousPeriodLong, twoPreviousPeriodLong] = periodNamesLong;
 
             // Getting the user and their supervisees' ids
+            console.log("Session UserId:", req.session.user.user_id);
             const userRaw = (await User.findByPk(req.session.user.user_id));
+            console.log("UserRaw:", userRaw);
             if (!userRaw) {
                 console.log("No user was found!");
                 return;
             }
             const user = userRaw.datavalues;
-            console.log(user);
+            console.log("User:", user);
 
             // Cleaning the supervisees string
             user.supervisees = await cleanSuperviseesString(user);
