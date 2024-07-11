@@ -6,12 +6,15 @@ const { weekArrLower, periodIdentifiers, findPeriodNames, findAllDates, findPeri
 // Supervisor Approve - RESTR: SUPER
 router.get("/", async (req, res) => {
     try {
+        console.log("Route accessed");
         if (req.session.user && req.session.user.isSuper) {
-
+            console.log("User is super.");
             // Getting dates
             const week = weekArrLower;
             const datesObj = await findAllDates();
+            console.log("Dates fetched.");
             const { periodNames, periodNamesLong } = await findPeriodNames();
+            console.log("Period names fetched.");
             const [currentPeriod, previousPeriod, twoPreviousPeriod] = periodNames;
             const [currentPeriodLong, previousPeriodLong, twoPreviousPeriodLong] = periodNamesLong;
 
@@ -22,6 +25,7 @@ router.get("/", async (req, res) => {
                 return;
             }
             const user = userRaw.datavalues;
+            console.log(user);
 
             // Cleaning the supervisees string
             user.supervisees = await cleanSuperviseesString(user);
