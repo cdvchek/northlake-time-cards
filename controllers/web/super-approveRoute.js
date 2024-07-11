@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
                 console.log("No user was found!");
                 return;
             }
-            const user = userRaw.datavalues;
+            const user = userRaw.dataValues;
             console.log("User:", user);
 
             // Cleaning the supervisees string
