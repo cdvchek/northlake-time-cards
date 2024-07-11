@@ -128,20 +128,12 @@
             </div>
             <ul id="all-ul" class="ul">
                 {{#each supervisees}}
-                <li class="supervisee" 
-                    data-id={{this.user_id}}
-                    data-titleid={{this.title_id}}>
-                    {{this.titleName}}
-                </li>
+                    <li class="supervisee" data-id={{this.user_id}} data-titleid={{this.title_id}}>{{this.titleName}}</li>
                 {{/each}}
             </ul>
             <ul id="ready-ul" class="ul ul-hidden">
                 {{#each readysupervisees}}
-                <li class="supervisee"
-                    data-id={{this.user_id}}
-                    data-titleid={{this.title_id}}>
-                    {{this.titleName}}
-                </li>
+                    <li class="supervisee" data-id={{this.user_id}} data-titleid={{this.title_id}}>{{this.titleName}}</li>
                 {{/each}}
             </ul>
             <ul id="checklist" class="ul ul-hidden">
