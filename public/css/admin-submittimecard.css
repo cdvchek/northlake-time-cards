@@ -3,46 +3,46 @@
     height: 100vh;
     background-color: gainsboro;
     overflow-y: scroll;
-
 }
 
 .container {
-    width: 100%;
+    width: 100vw;
 }
 
-.dropdown {
+.dropdown-period {
     border: 1px solid black;
     width: 90%;
-    margin: auto;
+    height: 60px;
+    margin: 10px auto 0px auto;
     padding-left: 25px;
 }
 
 .timecards-section {
     display: none;
     width: 90%;
+    height: calc(100vh - 286px);
     margin: auto;
-    padding-left: 25px;
-}
-
-.timecards-section > div > h4 {
-    margin-left: 25px;
-    margin-top: 0;
+    padding: 0px 12.5px;
+    background-color: white;
+    border: 1px black solid;
+    text-align: center;
+    overflow-y: scroll;
 }
 
 .timecard-display {
     display: flex;
     align-items: center;
+    width: 100%;
     height: 40px;
     border: 1px solid black;
-    margin: 10px 50px;
-    padding-left: 20px;
+    margin: 10px 0px;
 }
 
-.active {
+.active-period {
     background-color: rgb(102, 152, 102);
 }
 
-.user-identification-span {
+/* .user-identification-span {
     position: absolute;
     left: 100px;
 }
@@ -55,4 +55,10 @@
 .user-supervisor-span {
     position: absolute;
     left: 650px;
+} */
+
+span {
+    padding-left: 10px;
+    text-align: left;
+    width: 33.333%
 }

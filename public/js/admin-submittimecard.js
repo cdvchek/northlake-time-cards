@@ -1,4 +1,4 @@
-const dropdowns = document.getElementsByClassName("dropdown");
+const dropdowns = document.getElementsByClassName("dropdown-period");
 
 const openDropDown = (e) => {
     let target = e.target;
@@ -7,7 +7,7 @@ const openDropDown = (e) => {
     }
     for (let i = 0; i < dropdowns.length; i++) {
         const dropdown = dropdowns[i];
-        dropdown.setAttribute("class", "dropdown");
+        dropdown.setAttribute("class", "dropdown-period");
         const hideEl = document.getElementById(dropdown.getAttribute("data-id"));
         hideEl.style.display = "none";
     }
@@ -17,8 +17,8 @@ const openDropDown = (e) => {
         const elementId = target.getAttribute("data-id");
         const sectionToShow = document.getElementById(elementId);
         if (dropdown.getAttribute("data-id") === elementId) {
-            dropdown.setAttribute("class", "dropdown active");
-            sectionToShow.style.display = "inline";
+            dropdown.setAttribute("class", "dropdown-period active-period");
+            sectionToShow.style.display = "block";
         }
     }
 

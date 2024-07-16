@@ -3,7 +3,7 @@
     {{> navbar}}
     {{#each timeperiods}}
     <div class="container">
-        <div class="dropdown" data-id={{this.sectionId}}>
+        <div class="dropdown-period" data-id={{this.sectionId}}>
             <h3>{{this.timeperiodname}}</h3>
         </div>
         <div id={{this.sectionId}} class="timecards-section">
@@ -11,8 +11,19 @@
             <div id={{this.sectionIdApproved}}>
                 <h4>{{this.sectionApproved}}</h4>
                 {{#each this.timecards}}
-                <div class="timecard-display" data-id={{this.timecard_id}} data-userid={{this.user_id}}>
-                    <span class="user-identification-span">User: {{this.username}}</span><span class="user-title-span">Title: {{this.titlename}}</span><span class="user-supervisor-span">Supervisor: {{this.supervisorname}}</span>
+                <div class="timecard-display"
+                    data-id={{this.timecard_id}}
+                    data-userid={{this.user_id}}
+                >
+                    <span class="user-identification-span">
+                        {{this.username}}
+                    </span>
+                    <span class="user-title-span">
+                        {{this.titlename}}
+                    </span>
+                    <span class="user-supervisor-span">
+                        Supervisor: {{this.supervisorname}}
+                    </span>
                 </div>
                 {{/each}}
             </div>
