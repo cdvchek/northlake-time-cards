@@ -108,6 +108,39 @@ router.get("/create-new/:id", async (req, res) => {
     }
 });
 
+router.post("/title/:ids", async (req, res) => {
+    try {
+        console.log("RUNNING TEST");
+        console.log(req.session.user);
+        
+        if (req.session.user && req.session.user.isAdmin) {
+            const [titleId, userId] = req.params.ids.split("*");
+            const timecards = await TimeCard.findAll({ where: { user_id: userId, title_id: titleId } });
+            if (timecards.length > 0) {
+                for (let i = 0; i < timecards.length; i++) {
+                    const timecard = timecards[i].dataValues;
+                    await TimeCard.destroy({ where: { timecard_id: timecard.timecard_id } });
+                }
+            }
+            const title = await Title.findByPk(titleId);
+            const currentPeriodId = (await TimePeriod.findOne({ where: { isCurrent: true } })).dataValues.timeperiod_id;
+            const previousPeriodId = (await TimePeriod.findOne({ where: { isPrevious: true } })).dataValues.timeperiod_id;
+            const twoPreviousPeriodId = (await TimePeriod.findOne({ where: { isTwoPrevious: true } })).dataValues.timeperiod_id;
+            const periodIds = [currentPeriodId, previousPeriodId, twoPreviousPeriodId];
+            for (let i = 0; i < periodIds.length; i++) {
+                const periodId = periodIds[i];
+                await createTimecard(periodId, userId, title.title_id);
+            }
+            res.json({ msg: "timecards created" });
+        } else {
+            res.status(401).json({msg: "You cannot access this data", msg_type: "UNAUTHORIZED_DATA_ACCESS" });
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+});
+
 // API Update Time Card Route
 router.put("/timecard", async (req, res) => {
     try {

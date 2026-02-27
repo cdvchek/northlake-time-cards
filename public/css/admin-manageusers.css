@@ -100,6 +100,12 @@
     display: inline;
 }
 
+.create-timecards-title-btn {
+    position: absolute;
+    right: 135px;
+    top: 10px;
+}
+
 .remove-title-btn {
     position: absolute;
     right: 10px;

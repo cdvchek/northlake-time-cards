@@ -53,6 +53,12 @@ const populateProfile = async (e) => {
         removeBtn.setAttribute("class", "remove-title-btn");
         removeBtn.textContent = "Remove";
         removeBtn.addEventListener("click", removeTitle);
+        const createTimeCardsTitleBtn = document.createElement("button");
+        createTimeCardsTitleBtn.setAttribute("data-userid", userId);
+        createTimeCardsTitleBtn.setAttribute("data-titleid", title.title_id.toString());
+        createTimeCardsTitleBtn.setAttribute("class", "create-timecards-title-btn");
+        createTimeCardsTitleBtn.textContent = "Create Time Cards";
+        createTimeCardsTitleBtn.addEventListener("click", createTimeCardsTitle);
         const cancelBtn = document.createElement("button");
         cancelBtn.setAttribute("data-order", numberOfTitles.toString());
         cancelBtn.setAttribute("class", "cancel-title-btn");
@@ -66,6 +72,7 @@ const populateProfile = async (e) => {
 
         outsideDiv.appendChild(insideDiv);
         outsideDiv.appendChild(editBtn);
+        outsideDiv.appendChild(createTimeCardsTitleBtn);
         outsideDiv.appendChild(removeBtn);
         outsideDiv.appendChild(saveBtn);
         outsideDiv.appendChild(cancelBtn);
@@ -332,6 +339,26 @@ for (let i = 0; i < removeTitleBtns.length; i++) {
     removeTitleBtn.addEventListener("click", removeTitle);
 }
 
+const createTimeCardsTitleBtns = document.getElementsByClassName("create-timecards-title-btn");
+
+const createTimeCardsTitle = async (e) => {
+    console.log("RUNNING TEST");
+    
+    const titleId = e.target.getAttribute("data-titleid");
+    const userId = e.target.getAttribute("data-userid");
+    await fetch("/api/timecards/title/" + titleId + "*" + userId, {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        }
+    });
+}
+
+for (let i = 0; i < createTimeCardsTitleBtns.length; i++) {
+    const createTimeCardsTitleBtn = createTimeCardsTitleBtns[i];
+    createTimeCardsTitleBtn.addEventListener("click", createTimeCardsTitle);
+}
+
 // Saving a title
 const saveTitleBtns = document.getElementsByClassName("save-title-btn");
 
@@ -409,6 +436,12 @@ const addTitle = async () => {
         removeBtn.setAttribute("data-titleid", title.title_id.toString());
         removeBtn.textContent = "Remove";
         removeBtn.addEventListener("click", removeTitle);
+        const createTimeCardsTitleBtn = document.createElement("button");
+        createTimeCardsTitleBtn.setAttribute("data-userid", userId);
+        createTimeCardsTitleBtn.setAttribute("data-titleid", title.title_id.toString());
+        createTimeCardsTitleBtn.setAttribute("class", "create-timecards-title-btn");
+        createTimeCardsTitleBtn.textContent = "Create Time Cards";
+        createTimeCardsTitleBtn.addEventListener("click", createTimeCardsTitle);
         const cancelBtn = document.createElement("button");
         cancelBtn.setAttribute("data-order", numberOfTitles.toString());
         cancelBtn.setAttribute("class", "cancel-title-btn");
@@ -422,6 +455,7 @@ const addTitle = async () => {
 
         outsideDiv.appendChild(insideDiv);
         outsideDiv.appendChild(editBtn);
+        outsideDiv.appendChild(createTimeCardsTitleBtn);
         outsideDiv.appendChild(removeBtn);
         outsideDiv.appendChild(saveBtn);
         outsideDiv.appendChild(cancelBtn);
